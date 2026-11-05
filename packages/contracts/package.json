@@ -11,6 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test tests/*.test.cjs",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
     "format": "prettier --ignore-path ../../.prettierignore --write .",
@@ -24,9 +25,12 @@
     }
   },
   "devDependencies": {
-    "@quilt/typescript-config": "workspace:*",
     "@quilt/eslint-config": "workspace:*",
-    "@quilt/prettier-config": "workspace:*"
+    "@quilt/prettier-config": "workspace:*",
+    "@quilt/typescript-config": "workspace:*"
   },
-  "prettier": "@quilt/prettier-config"
+  "prettier": "@quilt/prettier-config",
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
 }

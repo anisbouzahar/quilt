@@ -1,6 +1,5 @@
 import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-// Initial infrastructure only; financial and membership models are still open.
 export const workspaces = pgTable('workspaces', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
@@ -8,3 +7,4 @@ export const workspaces = pgTable('workspaces', {
     .defaultNow()
     .notNull(),
 });
+

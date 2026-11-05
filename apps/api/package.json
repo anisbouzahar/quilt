@@ -7,27 +7,32 @@
     "build": "nest build",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
+    "test": "pnpm build && node --test tests/*.test.cjs",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
     "format": "prettier --ignore-path ../../.prettierignore --write .",
     "format:check": "prettier --ignore-path ../../.prettierignore --check ."
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.17",
     "@nestjs/common": "^11.1.0",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.0",
     "@nestjs/platform-express": "^11.1.0",
-    "@nestjs/config": "^4.0.2",
     "@quilt/contracts": "workspace:*",
     "@quilt/db": "workspace:*",
     "@quilt/domain": "workspace:*",
+    "better-auth": "^1.7.17",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.12",
-    "@quilt/typescript-config": "workspace:*",
     "@quilt/eslint-config": "workspace:*",
-    "@quilt/prettier-config": "workspace:*"
+    "@quilt/prettier-config": "workspace:*",
+    "@quilt/typescript-config": "workspace:*",
+    "@types/express": "^5.0.6"
   },
   "prettier": "@quilt/prettier-config"
 }

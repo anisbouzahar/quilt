@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { HealthController } from './health.controller';
+import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { HealthController } from './health.controller';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -10,6 +12,8 @@ import { DatabaseModule } from './database/database.module';
       envFilePath: ['.env', '../../.env'],
     }),
     DatabaseModule,
+    AuthModule,
+    OrganizationsModule,
   ],
   controllers: [HealthController],
 })
