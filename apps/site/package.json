@@ -21,10 +21,10 @@
     "fumadocs-ui": "16.18.0",
     "lucide-react": "1.69.0",
     "next": "16.4.5",
-    "pele": "^1.13.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "zod": "^4.0.0"
+    "pele": "1.13.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@quilt/eslint-config": "workspace:*",
@@ -32,10 +32,10 @@
     "@quilt/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "4.3.4",
     "@types/mdx": "2.0.14",
-    "@types/react": "~19.3.0",
-    "@types/react-dom": "19.3.0",
-    "tailwindcss": "4.3.4",
-    "typescript": "~6.0.3"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   },
   "prettier": "@quilt/prettier-config"
 }

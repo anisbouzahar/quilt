@@ -28,11 +28,11 @@
     "format:check": "prettier --ignore-path ../../.prettierignore --check ."
   },
   "peerDependencies": {
-    "react": "19.3.0",
+    "react": "catalog:",
     "react-native": "0.88.1"
   },
   "devDependencies": {
-    "@types/react": "~19.3.0",
+    "@types/react": "catalog:",
     "@quilt/typescript-config": "workspace:*",
     "@quilt/eslint-config": "workspace:*",
     "@quilt/prettier-config": "workspace:*"
@@ -41,7 +41,7 @@
     "tamagui": "3.2.2",
     "@tamagui/config": "3.2.2",
     "@tamagui/tailwind": "3.2.2",
-    "tailwindcss": "4.3.0"
+    "tailwindcss": "catalog:"
   },
   "type": "module",
   "prettier": "@quilt/prettier-config"

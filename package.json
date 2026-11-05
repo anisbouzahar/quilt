@@ -33,11 +33,11 @@
     "@quilt/prettier-config": "workspace:*",
     "@quilt/typescript-config": "workspace:*",
     "@resvg/resvg-js": "2.6.2",
-    "@types/node": "^24.10.0",
-    "eslint": "^10.14.0",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
     "pngjs": "7.0.0",
-    "prettier": "^3.6.2",
-    "turbo": "^2.11.10",
-    "typescript": "~6.0.3"
+    "prettier": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
   }
 }
