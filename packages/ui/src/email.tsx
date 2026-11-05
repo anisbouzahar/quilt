@@ -5,7 +5,9 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -13,6 +15,7 @@ import {
 import { radii, spacing, themes, typography } from './tokens.js';
 
 const colors = themes.light;
+export const emailLogoCid = 'quilt-logo@quilt';
 const fontFamily =
   '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
 
@@ -35,19 +38,22 @@ export function EmailLayout({
         }}
       >
         <Container style={{ maxWidth: 520, margin: '0 auto' }}>
-          <Text
+          <Img
+            src={`cid:${emailLogoCid}`}
+            alt="Quilt"
+            width={133}
+            height={56}
             style={{
-              color: colors.primary,
-              fontSize: 26,
-              fontWeight: 600,
-              letterSpacing: -1,
-              margin: '0 0 24px',
+              display: 'block',
+              margin: `0 auto ${spacing['2xl']}px`,
             }}
-          >
-            Quilt
-          </Text>
+          />
           {children}
-          <EmailText muted variant="caption" style={{ marginTop: 24 }}>
+          <EmailText
+            muted
+            variant="caption"
+            style={{ marginTop: 24, textAlign: 'center' }}
+          >
             Shared spending. Clearer plans.
           </EmailText>
         </Container>
@@ -63,7 +69,7 @@ export function EmailCard({ children }: PropsWithChildren) {
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
         borderRadius: radii.lg,
-        padding: spacing['2xl'],
+        padding: spacing.xl,
       }}
     >
       {children}
@@ -87,6 +93,18 @@ export function EmailHeading({ children }: PropsWithChildren) {
     >
       {children}
     </Heading>
+  );
+}
+
+export function EmailDivider() {
+  return (
+    <Hr
+      style={{
+        border: 0,
+        borderTop: `1px solid ${colors.border}`,
+        margin: `${spacing.xl}px 0`,
+      }}
+    />
   );
 }
 

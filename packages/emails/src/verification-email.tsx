@@ -1,10 +1,13 @@
 import {
   EmailButton,
   EmailCard,
+  EmailDivider,
   EmailHeading,
   EmailLayout,
   EmailText,
 } from '@quilt/ui/email';
+import { Link, Section } from 'react-email';
+import { themes } from '@quilt/ui/tokens';
 
 export interface VerificationEmailProps {
   name: string;
@@ -17,29 +20,41 @@ export function VerificationEmail({
   return (
     <EmailLayout preview="Confirm your email to start your household on Quilt.">
       <EmailCard>
-        <EmailHeading>Confirm your email.</EmailHeading>
         <EmailText>
           {name.trim() ? `Hi ${name.trim()},` : 'Hi there,'}
         </EmailText>
+        <EmailHeading>Confirm your email.</EmailHeading>
         <EmailText>
-          Confirm this email address to finish setting up your Quilt account.
-          Then you can start a space for the spending and plans you share.
+          Confirm this address to finish creating your Quilt account.
         </EmailText>
-        <EmailButton label="Confirm my email" href={verificationURL} />
-        <EmailText muted variant="caption">
-          This link expires in one hour. If you didn’t create a Quilt account,
-          you can ignore this email.
-        </EmailText>
-        <EmailText muted variant="caption">
-          Button not opening? Copy this link into your browser:
-        </EmailText>
+        <Section style={{ textAlign: 'center', paddingTop: 8 }}>
+          <EmailButton label="Confirm my email" href={verificationURL} />
+        </Section>
         <EmailText
+          muted
           variant="caption"
-          style={{ overflowWrap: 'anywhere', wordBreak: 'break-all' }}
+          style={{ textAlign: 'center', margin: 0 }}
         >
-          {verificationURL}
+          This link expires in one hour.
+        </EmailText>
+        <EmailDivider />
+        <EmailText muted variant="caption" style={{ margin: 0 }}>
+          Didn’t create a Quilt account? You can safely ignore this email.
         </EmailText>
       </EmailCard>
+      <EmailText
+        muted
+        variant="caption"
+        style={{ textAlign: 'center', margin: '24px 16px 0' }}
+      >
+        Button not opening?{' '}
+        <Link
+          href={verificationURL}
+          style={{ color: themes.light.primary, textDecoration: 'underline' }}
+        >
+          Use the confirmation link.
+        </Link>
+      </EmailText>
     </EmailLayout>
   );
 }

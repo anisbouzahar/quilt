@@ -59,6 +59,11 @@ UI does not include the email renderer.
 
 `@quilt/emails` owns `VerificationEmail` and `renderVerificationEmail`. Templates
 compose the shared email components and render to HTML plus a text alternative.
+The full logo uses a PNG rendered from the site's `quilt-logo-light.svg` and ships
+in the email package's `assets` directory. The renderer returns it as an inline
+CID attachment alongside the HTML and text; the SMTP service sends all three
+together. The logo therefore requires no external image request. Template
+previews must resolve the CID image to the returned attachment.
 Change a template's content there; change common visual values in the shared UI
 tokens. JSX escapes display names, and rendering rejects non-HTTP(S) links.
 
