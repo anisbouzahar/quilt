@@ -1,0 +1,69 @@
+---
+title: Domain package
+description: Use framework-independent models, money arithmetic, and validation.
+---
+
+Framework-independent household finance models and pure rules shared by the
+NestJS API and Expo app. See the [glossary](/docs/glossary) and
+[model proposal](/docs/domain-model) for confirmed decisions,
+relationships, examples, and unresolved policies.
+
+```ts
+import {
+  money,
+  addMoney,
+  currencyCode,
+  decimalAmount,
+  convertMoney,
+  entityId,
+  type EntityId,
+} from '@quilt/domain';
+
+const household: EntityId<'workspace'> = entityId<'workspace'>('household-1');
+const total = addMoney(money('0.10', 'EUR'), money('0.20', 'EUR'));
+// { amount: '0.3', currency: 'EUR' }
+
+const converted = convertMoney(
+  money('10', 'USD'),
+  {
+    baseCurrency: currencyCode('USD'),
+    quoteCurrency: currencyCode('EUR'),
+    rate: decimalAmount('0.92345'),
+    source: 'example-provider',
+    asOf: '2026-11-05',
+    retrievedAt: '2026-11-05T12:00:00Z',
+  },
+  2,
+  'half-even',
+);
+// converted.original is retained; converted.converted is EUR 9.23.
+```
+
+Identifiers and monetary primitives are branded strings. Constructors validate
+syntax; supported currencies, precision, timestamp formats, and structural API
+input validation remain adapter responsibilities. `Money` contains no bigint
+or Date values and can be JSON-serialized directly. Arithmetic never converts
+monetary decimals through JavaScript `Number`.
+
+Use `validateTransaction` with resolved account/category/merchant/tag references,
+`validateAccount`, `validateBudget`, and `validateGoal` before accepting parsed
+core records. These functions throw on domain relationship violations. They are
+not general JSON parsers and do not replace server authorization, atomic version
+checks, database constraints, or validators for the proposed intake workflows.
+
+`hasWorkspacePermission` evaluates active owner/editor/viewer membership. Load
+current membership on the server; the client’s role is not authoritative.
+`spendingByCurrency(workspaceId, transactions)` keeps currencies separate and
+counts only booked, nonvoided expenses minus refunds. Supply an intentionally
+selected period/complete dataset; cached partial data cannot establish a full
+household total.
+
+```sh
+pnpm --filter @quilt/domain test
+```
+
+The dependency-free tests exercise exact arithmetic, explicit conversions,
+workspace boundaries, membership revocation, split totals, transfers, refunds,
+monthly date edges, budget limits, and spending semantics. They run from the
+compiled package using Node’s built-in test runner. `pnpm test` and `pnpm check`
+include them at the workspace root.

@@ -1,0 +1,14 @@
+{
+  "title": "Quilt documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "households",
+    "domain-model",
+    "glossary",
+    "product-scope",
+    "architecture",
+    "development",
+    "project-status"
+  ]
+}

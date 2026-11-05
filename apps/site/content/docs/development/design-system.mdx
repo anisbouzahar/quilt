@@ -1,0 +1,129 @@
+---
+title: Design system
+description: Shared Tamagui controls, Tailwind utilities, visual tokens, and themes.
+---
+
+Shared Tamagui + Tailwind UI for the Expo mobile and web application. Quilt keeps
+its modern, minimal, quietly warm identity: sage accents, near-white surfaces,
+charcoal type, restrained corners, and buttons with subtle depth.
+
+## Use
+
+```tsx
+import { Button, Card, QuiltProvider, Text, TextField, View } from '@quilt/ui';
+
+export function Example() {
+  return (
+    <QuiltProvider>
+      <Card className="p-4 md:p-6">
+        <View className="gap-2">
+          <Text variant="heading">Your household</Text>
+          <Text className="text-textMuted">
+            A shared picture of your money.
+          </Text>
+        </View>
+        <TextField label="Household name" placeholder="Our home" />
+        <Button label="Continue" onPress={() => console.log('Continue')} />
+      </Card>
+    </QuiltProvider>
+  );
+}
+```
+
+Import these primitives from `@quilt/ui`. `View`, `Text`, `Card`, and `Button`
+accept Tamagui Tailwind `className` values. `TextField.className` styles its outer
+layout; its `style` prop reaches the Tamagui Input. Plain React Native views do
+not process these utilities.
+
+## Configuration and themes
+
+`packages/ui/src/tokens.ts` owns Quilt's palette, typography reference, spacing, and radii.
+`packages/ui/src/tamagui.config.ts` maps those values into the Tamagui config, supplies a
+system-font scale, and registers typed tokens and responsive media queries.
+Keep custom theme values in those files rather than duplicating hex codes in
+screens or maintaining a second Tailwind palette.
+
+`QuiltProvider` mounts the Tamagui provider. `theme="system"` is the default;
+`"light"` and `"dark"` are available for previews or an app preference. Semantic
+classes such as `bg-surface`, `text-textMuted`, and `border-controlBorder` use the
+active theme, so a screen does not need two sets of color classes.
+
+`useQuiltTheme()` remains available for platform APIs and dynamic data styles.
+It returns `{ mode, colors }`. The gallery's theme selection is temporary.
+
+| Foundation        | Value                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Semantic colors   | background, surface, surfaceMuted, text, textMuted, primary, onPrimary, border, controlBorder, danger, success, warning |
+| Spacing           | Tailwind numeric scale (`p-4` = 16, `gap-6` = 24); named Quilt aliases remain available                                 |
+| Corners           | sm = 6, md = 8, lg = 12                                                                                                 |
+| Typography        | System fonts; display, heading, title, body, label, caption                                                             |
+| Responsive widths | sm = 640, md = 768, lg = 1024, xl = 1280; min-width queries                                                             |
+| Controls          | Minimum 48-point height; font scaling remains enabled                                                                   |
+
+Use static class strings when possible:
+
+```tsx
+<View className="flex-col md:flex-row gap-4 bg-surface rounded-lg p-6" />
+```
+
+## Components and platform behavior
+
+- `Text`: Quilt typography and semantic tone, plus optional utility overrides.
+- `Card`: themed surface with shared padding, corners, and border.
+- `Button`: primary/secondary variants, loading/disabled states, and `onPress`.
+  It uses Tamagui's semantic button: a button on web and native interaction on
+  mobile. Hover, focus, and press styling run through Tamagui's shared engine.
+- `IconButton`: accessible icon control with a 48-point target; always provide
+  an `aria-label` and icon children.
+- `ActionMenu`: labelled action list using a keyboard-aware desktop menu and
+  a mobile modal drawer. Its `trigger` render callback receives an optional
+  `onPress`; forward it to your button. Desktop trigger behavior comes from
+  Tamagui Menu. Actions receive `onSelect` callbacks.
+- `Drawer`: controlled modal side panel, title/description, scrollable content,
+  web focus management, Android back handling, and keyboard avoidance. Pass
+  safe-area insets from the application when available. Navigation stays in
+  the app; this primitive also serves forms and contextual actions.
+- `TextField`: Tamagui Input with visible label, hint/error text, linked
+  descriptions, invalid state, disabled state, and an input ref. Validation
+  remains the caller's responsibility.
+
+Loading buttons block repeated presses. Raised button shadows and highlighted
+edges compress on press; disabled buttons remain flat. Status colors accompany
+text. Currency arithmetic and formatting policy belong outside the UI package.
+Native device checks for screen readers, text scaling, keyboard behavior, and
+shadows remain necessary; a successful JavaScript bundle is not device QA.
+
+## Build and styling scope
+
+All Tamagui packages are pinned to the same version. The UI package emits ESM
+and declarations using TypeScript's bundler resolution. Expo Metro consumes
+source for native and the compiled package for web.
+
+This implementation uses the documented runtime styling path. Expo's existing
+Metro configuration is sufficient; there is no separate Vite application,
+NativeWind installation, CSS import, or Tailwind CLI build step. `tailwindcss`
+is pinned to the version expected by `@tamagui/tailwind`. The Tamagui compiler
+and static CSS extraction are not enabled in this initial migration.
+
+Tamagui's utility frontend supports a cross-platform subset of Tailwind syntax.
+Use flexbox for shared layouts. Unrecognized web-only classes need an actual
+web CSS build and have no native equivalent; do not assume every Tailwind plugin
+or CSS selector works on mobile. The config deliberately allows explicit style
+props too, as used by Tamagui Input, alongside utility-authored components.
+
+## Preview and checks
+
+```sh
+pnpm dev:web
+pnpm dev:mobile
+pnpm check
+pnpm --filter @quilt/mobile exec expo export --platform all
+```
+
+Root development commands build workspace packages first. The gallery exercises
+custom semantic tokens, responsive utility classes, both themes, buttons, and
+controlled form fields. It uses sample data only.
+
+References: [Tamagui installation](https://tamagui.dev/docs/intro/installation),
+[Tamagui Tailwind](https://tamagui.dev/tailwind/core/tailwind), and
+[Expo integration](https://tamagui.dev/docs/guides/expo).

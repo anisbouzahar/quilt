@@ -1,0 +1,47 @@
+---
+title: Project status
+description: Working foundations, prototype behavior, and the next implementation steps.
+---
+
+## Working foundations
+
+- A pnpm monorepo with Expo, NestJS, and shared packages.
+- A landing page and searchable Fumadocs documentation in Next.js.
+- A reusable sage-and-cream design system with device-following light/dark themes.
+- App routes for overview, spending, budgets, goals, settings, and the design-system gallery.
+- Pure domain types and validation for household finances.
+- Exact money arithmetic, explicit conversion, and domain tests.
+- A NestJS process health endpoint and initial Drizzle/PostgreSQL connection layer.
+
+## Prototype behavior
+
+The application shows **sample financial data**. Its spending filter, appearance
+controls, floating navigation, and drawers are interactive. Expense entry is a
+local preview; it does not save a transaction.
+
+The product illustration on the landing page is a visual example, not an
+interactive banking dashboard or a claim that financial storage is connected.
+
+## Not connected yet
+
+- Authentication and household membership endpoints.
+- Stored accounts, transactions, budgets, and goals.
+- Financial tables and domain-to-Drizzle adapters.
+- Online editing with cached viewing.
+- Atomic conflict detection, retry idempotency, and audit history.
+- Imports, receipt scanning, extraction, and payment matching.
+- FX data providers and historical reporting policy.
+
+## Next implementation slice
+
+Review the first domain pass, map accepted models to Drizzle constraints, and
+build an authenticated household workflow through the NestJS API. Financial
+writes need current membership checks, atomic version handling, and idempotency
+before the prototype can be treated as a working finance application.
+
+## Open product decisions
+
+Budget rollover and refund attribution, goal funding, bill schedule changes,
+import formats, extraction providers, and privacy/retention still need explicit
+decisions. The [original scope](/docs/product-scope) and [model notes](/docs/domain-model)
+distinguish confirmed requirements from proposals.

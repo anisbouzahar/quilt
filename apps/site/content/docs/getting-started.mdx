@@ -1,0 +1,75 @@
+---
+title: Getting started
+description: Run Quilt’s site, documentation, app, and backend locally.
+---
+
+## Requirements
+
+Use Node.js 24 and pnpm 11.17.0, as pinned in the repository. PostgreSQL is only
+required for database-backed work; the current API health endpoint and shared
+package checks work without it.
+
+## Install
+
+From the repository root:
+
+```sh
+nvm use
+pnpm install
+```
+
+## Landing page and documentation
+
+```sh
+pnpm dev:site
+```
+
+Open [localhost:3001](http://localhost:3001) for the landing page and
+[localhost:3001/docs](http://localhost:3001/docs) for this documentation.
+Both live in the same Next.js application, `apps/site`.
+
+## Mobile app and web companion
+
+```sh
+pnpm dev:mobile
+# Or launch the Expo web companion:
+pnpm dev:web
+```
+
+Expo prints its local URL and device instructions. The companion is the
+interactive application; the Next.js site introduces the project and hosts its
+documentation.
+
+## Backend
+
+```sh
+pnpm dev:api
+```
+
+The NestJS process health endpoint is
+[localhost:3000/api/health](http://localhost:3000/api/health).
+Authentication and financial endpoints are not implemented yet.
+
+## Check and build
+
+```sh
+pnpm check
+pnpm test
+pnpm build:site
+```
+
+`pnpm check` runs ESLint, TypeScript checks, domain tests, and Prettier across the
+workspace. `build:site` builds shared packages and then the Next.js production
+site. It does not publish the site or configure a hosting provider.
+
+## Write documentation
+
+Add Markdown or MDX files to `apps/site/content/docs`. Give each page a `title`
+and `description` in frontmatter, and add it to `meta.json` to control sidebar
+order. Fumadocs provides navigation, a table of contents, and document search.
+
+The [domain model](/docs/domain-model) and [glossary](/docs/glossary) are the
+canonical model notes. All project documentation lives in this Fumadocs content
+folder. Keep it aligned with accepted product decisions and clearly label
+proposed behavior. See the [workspace guide](/docs/development/workspace) for
+database, formatting, and repository details.

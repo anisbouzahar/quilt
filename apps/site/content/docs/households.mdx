@@ -1,0 +1,53 @@
+---
+title: Households and currencies
+description: Shared workspaces, clear permissions, and original monetary values.
+---
+
+## A workspace represents a household
+
+A user can belong to multiple workspaces. Financial accounts, transactions,
+merchants, categories, tags, budgets, goals, and supporting financial records
+belong to a workspace.
+
+A financial account is separate from a user identity. The current proposal
+shares financial accounts within a workspace; private accounts within a
+household are not modeled yet.
+
+## Membership roles
+
+| Role   | Read shared finances | Edit shared finances | Manage membership |
+| ------ | -------------------- | -------------------- | ----------------- |
+| Owner  | Yes                  | Yes                  | Yes               |
+| Editor | Yes                  | Yes                  | No                |
+| Viewer | Yes                  | No                   | No                |
+
+These roles are confirmed product decisions, represented by a tested pure
+permission policy. The server must still load current membership, enforce
+permissions on every request, and preserve at least one owner. Authentication,
+invitations, and membership endpoints have not been implemented.
+
+## Accounts keep their currencies
+
+A household may hold accounts in different currencies. A workspace’s preferred
+reporting currency does not replace those original amounts.
+
+For example, EUR 100 and USD 100 are two distinct quantities. The domain package
+rejects adding them without explicit conversion. Its spending helper returns
+separate totals per currency rather than inventing a combined balance.
+
+## Explicit conversions
+
+Conversion records retain the original amount, the converted amount, the rate,
+its source and dates, and the chosen precision and rounding mode.
+
+A production FX source, the initial supported currencies, and the rules for
+historical versus current valuation are still open decisions. The existing
+currency-code constructor validates syntax, not an approved currency registry.
+
+## Online editing and cached viewing
+
+The agreed direction requires a connection to submit edits. Cached data may be
+viewable offline, but the interface must make its age and coverage clear.
+
+The prototype does not yet implement this cache. A partial cached transaction
+list must not be presented as a complete household balance.

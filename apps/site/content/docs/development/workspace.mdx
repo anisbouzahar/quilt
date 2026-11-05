@@ -1,0 +1,149 @@
+---
+title: Workspace guide
+description: Repository setup, structure, database commands, and checks.
+---
+
+pnpm workspace for a household finance app: Expo/React Native for mobile and web,
+NestJS for the API, and Drizzle ORM with PostgreSQL.
+
+## Requirements
+
+- Node.js 24 (`nvm use`)
+- pnpm 11.17.0 (pinned in `package.json`)
+- PostgreSQL only when working with database-backed features
+
+## Start
+
+```sh
+pnpm install
+pnpm dev
+```
+
+The API listens on `http://localhost:3000/api/health`. Expo prints the QR code
+and simulator options; press `w` for the web companion.
+
+Run a single surface with `pnpm dev:api`, `pnpm dev:mobile`, `pnpm dev:web`,
+or `pnpm dev:site`. The Next.js site runs on `http://localhost:3001`, with
+documentation at `/docs`; see [site setup](/docs/development/site).
+These commands build shared packages first. `pnpm dev` also watches shared
+packages; when running individual surfaces, run a package's `dev` script in a
+separate terminal if editing its source.
+
+## Structure
+
+```text
+apps/
+  api/          NestJS API, process health endpoint, lazy Drizzle provider
+  mobile/       Expo application targeting iOS, Android, and web
+  site/         Next.js landing page and Fumadocs documentation
+packages/
+  contracts/    Shared API types
+  domain/       Financial models, exact money, permissions, and pure rules
+  ui/           Shared tokens, light/dark themes, and mobile/web controls
+  db/           Server-only Drizzle client, schema, and migrations
+  typescript-config/  Shared compiler presets
+  eslint-config/      Shared lint rules and platform presets
+  prettier-config/    Shared formatting options
+apps/site/content/docs/  All project documentation
+```
+
+Use `workspace:*` for internal dependencies. Keep `@quilt/db` out of client
+applications. Runtime libraries emit JavaScript and declarations into `dist`;
+configuration packages are consumed directly without a build step.
+
+The Expo app uses Expo Router with a floating mobile dock, a desktop rail,
+shared menus, and modal drawers. Overview, spending, budgets, and goals use
+sample data; the design-system gallery and settings are in the navigation
+menu. Run `pnpm dev:web` or `pnpm dev:mobile` to preview it. See
+[app navigation](/docs/development/app-navigation) for routes and deployment routing, and
+[shared controls](/docs/development/design-system) for visual guidelines.
+
+The app icon source is `apps/mobile/assets/icon.svg`. Run
+`pnpm icons:generate` after changing it to regenerate the native icon, web
+favicon, and Android adaptive/monochrome layers. Native icons use an opaque
+square background for system masking; the favicon retains the SVG's rounded
+background. Android foregrounds include safe-area padding. Launcher icon
+changes take effect in a new native build.
+
+`pnpm icons:check` compares the icon silhouette against its configured brand
+reference image; that image must be available to run the comparison.
+
+## Database
+
+Copy `.env.example` to `.env` at the repository root and set `DATABASE_URL` to
+a development PostgreSQL database. Never put database credentials in Expo's
+public environment variables. Start and manage PostgreSQL separately.
+
+```sh
+pnpm db:generate  # Generate SQL from packages/db/src/schema.ts
+pnpm db:migrate   # Apply committed migrations to DATABASE_URL
+pnpm db:studio   # Inspect the configured development database
+```
+
+The starter schema contains only a workspace table. The shared
+[domain models](/docs/domain-model) define financial concepts and pure
+rules separately; their persistence adapters and migrations are not implemented.
+No authentication, membership authorization, financial endpoints, or Supabase
+configuration is implemented yet. Do not expose the schema directly to clients until access
+policies are in place. The health endpoint reports process liveness, not
+database readiness, and works without PostgreSQL.
+
+## Checks
+
+```sh
+pnpm check       # ESLint, TypeScript, domain tests, Prettier
+pnpm test        # Domain invariants and financial arithmetic
+pnpm build       # Shared packages, NestJS, Expo web export, and Next.js site
+pnpm build:site  # Shared packages and the Next.js site only
+```
+
+### Linting
+
+See [Linting and formatting](/docs/development/code-quality) for the shared
+configuration, package commands, and editor integration.
+
+```sh
+pnpm lint        # Check the entire workspace; warnings fail the command
+pnpm lint:fix    # Apply available ESLint fixes, then report remaining issues
+```
+
+Apps and libraries select presets from `@quilt/eslint-config` through their
+local `eslint.config.mjs`. These apply type-aware TypeScript rules, including
+unsafe types and unhandled promises. Expo sources
+also use the recommended React Hooks rules, with missing effect dependencies
+treated as errors. Node and React Native globals are scoped to their respective
+applications; browser globals are available in `.web.ts` and `.web.tsx` files.
+Import restrictions keep database and NestJS dependencies out of the mobile
+application and the shared domain/contracts source.
+
+Build outputs, generated migrations, and local tool caches are excluded.
+Configuration files use syntax-based rules without requiring a TypeScript
+project. Lint commands build shared packages first so type-aware checks can
+resolve workspace declarations on a fresh checkout. Prettier handles formatting
+separately through `pnpm format` and `pnpm format:check`.
+
+### Formatting
+
+```sh
+pnpm format        # Format source and configuration files
+pnpm format:check  # Check formatting without changing files
+```
+
+The shared `@quilt/prettier-config` specifies two-space indentation, an 80-column wrap
+target, semicolons, single quotes in JavaScript/TypeScript, double quotes in JSX,
+trailing commas, parentheses around arrow-function arguments, and LF line
+endings. Markdown line wrapping is preserved. `.editorconfig` aligns indentation
+and line endings in compatible editors.
+
+TypeScript configurations extend `@quilt/typescript-config` presets, retaining
+framework-specific options and project file paths locally. See
+[shared tooling configuration](/docs/development/code-quality) for inheritance
+examples and the preset assigned to each project.
+
+Generated migrations, the lockfile, Next.js/MDX generated files, build outputs,
+and caches are excluded by `.prettierignore`. Formatting checks already run as part
+of `pnpm check`.
+
+Native iOS/Android compilation needs the relevant native tooling and is separate
+from the web export. No application secrets or database connection are needed
+for type checking and building.

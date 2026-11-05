@@ -1,0 +1,265 @@
+---
+title: Original product scope
+description: The original working draft, separating confirmed requirements from proposals.
+---
+
+This page preserves the original working draft. Later confirmed choices are
+documented in [Households and currencies](/docs/households) and the
+[Domain model](/docs/domain-model); they take precedence over older proposals
+below. This draft is reference material, not a finalized delivery commitment.
+
+Working draft — 5 November 2026
+
+## 1. Purpose
+
+Quilt is a warm, grounding finance-management application that brings everyday spending, monthly budgeting, and longer-term goals into one shared picture.
+
+This document consolidates the discussion. It distinguishes user-confirmed requirements from proposed supporting features and unresolved technical decisions. It is not a finalized delivery commitment.
+
+## 2. Confirmed product direction
+
+- Working name: Quilt. Trademark, domain, and app-store availability are not verified.
+- Brand feeling: warm and grounding; supportive rather than restrictive.
+- Platforms: mobile, web, and desktop.
+- Frontend preference: React, with native-feeling mobile performance.
+- Performance expectation: fast, immediate interaction despite substantial transaction and currency data.
+- Collaboration: multiple people can edit the same financial workspace.
+
+## 3. User-confirmed features
+
+### 3.1 Monthly budgeting and expenses
+
+- Create and manage budgets.
+- Track monthly expenses.
+- Bring day-to-day spending and planning together in one application.
+- Exact budget periods, rollover behavior, and overspending rules remain to be specified.
+
+### 3.2 Goals
+
+- Create and track yearly financial goals.
+- Connect everyday financial management with longer-term plans.
+- Contribution rules, funding sources, and progress calculations remain to be specified.
+
+### 3.3 Transactions
+
+- Manually create transactions.
+- Organize transactions according to user needs.
+- Import transactions.
+- Handle substantial transaction histories while keeping the interface responsive.
+- Exact transaction types, supported import formats, and editing/deletion rules remain to be specified.
+
+### 3.4 Merchants, categories, and tags
+
+- Create and manage merchants.
+- Create and manage categories.
+- Associate transactions with merchants and categories.
+- Add tags to transactions.
+- Users define their own organization rather than relying exclusively on a fixed taxonomy.
+
+### 3.5 Monthly bills
+
+- Add and manage monthly bills.
+- Scheduling, reminders, variable amounts, and payment-matching behavior remain to be specified.
+
+### 3.6 Currency data
+
+- Handle currency information alongside financial transactions.
+- Supported currencies, conversion sources, historical-rate policy, reporting currency, and supported asset types remain to be specified.
+
+### 3.7 Shared financial workspaces
+
+- Multiple people can edit the same workspace.
+- Changes must be reflected consistently across participants.
+- Membership roles, invitation flows, private accounts, and access restrictions remain to be specified.
+
+### 3.8 Receipt and bill scanning
+
+- Capture receipts/bills at purchase time.
+- Extract the relevant financial information from the image.
+- Exact extraction fields and automatic acceptance rules remain to be finalized.
+
+## 4. Proposed supporting behavior — not yet confirmed
+
+### 4.1 Local-first and offline interaction
+
+Local-first was explored as an architectural direction; the exact offline product promise is not finalized.
+
+- Read locally available records without waiting for the network.
+- Persist offline edits and synchronize after reconnection.
+- Show pending, synchronized, failed, and conflicting changes.
+- Preserve queued operations across application restarts.
+- State clearly when displayed information may not include other members’ latest changes.
+- Define which history is available offline and avoid presenting partial local data as complete totals.
+
+### 4.2 Collaboration safety
+
+- Check workspace permissions on every server-side write.
+- Make retries idempotent so operations do not create duplicates.
+- Detect conflicting edits to sensitive financial fields.
+- Preserve independent changes where safe, such as adding different tags.
+- Define deletion-versus-edit and revoked-membership behavior.
+- Keep a record of who changed financial data and when.
+- Explain rejected changes and allow recovery without blocking later operations.
+
+### 4.3 Import workflow
+
+- Parse and preview imported data before acceptance.
+- Map columns and validate dates, amounts, signs, and currencies.
+- Preserve import batch and source-row provenance.
+- Detect exact duplicates and suggest uncertain matches for review.
+- Reconcile imported activity with manually entered or receipt-backed expenses.
+- Preserve user tags, notes, merchant assignments, and categorization on reimport.
+- Process large imports in bounded batches or background jobs.
+- Distinguish retry deduplication from uncertain financial matching.
+
+### 4.4 Receipt extraction workflow
+
+- Save the capture locally before upload.
+- Queue processing when offline; offline extraction is not promised.
+- Extract merchant, purchase date/time, total, and currency where available.
+- Optionally extract subtotal, tax, discounts, tips, receipt number, and purchased items.
+- Distinguish extracted facts from inferred merchant matches, categories, and tags.
+- Create a reviewable expense draft rather than silently posting a confirmed transaction.
+- Highlight missing, uncertain, or inconsistent values.
+- Require user confirmation of critical financial fields initially.
+- Suggest attaching a receipt to an existing transaction instead of duplicating spending.
+- Preserve original extraction results separately from user corrections.
+- Do not assume an invoice proves payment.
+- Store images privately and authorize access by workspace membership.
+
+### 4.5 Recurring bill behavior
+
+- Separate a recurring schedule from its dated occurrences and actual payments.
+- Track upcoming, overdue, paid, or skipped occurrences.
+- Match actual transactions to expected bills without double-counting spending.
+- Handle month-end dates, amount changes, and skipped payments explicitly.
+- Prevent duplicate occurrence generation across devices.
+- Distinguish actual spending from forecasts and upcoming commitments.
+
+### 4.6 Financial correctness and organization
+
+- Use exact monetary arithmetic with explicit rounding rules.
+- Keep amount and currency together as a meaningful financial unit.
+- Preserve original transaction amounts and exchange-rate provenance.
+- Distinguish historical conversion from current valuation.
+- Show the age of cached rates when offline.
+- Treat transfers differently from expenses.
+- Consider split categorization, refunds, pending/booked states, merchant merging, and category archiving.
+- Avoid deleting historical transactions when referenced organization records are removed.
+
+### 4.7 Views and reporting discussed
+
+- Dashboard of accounts, balances, spending, budgets, and goals.
+- Searchable and filterable transaction history.
+- Monthly and category summaries.
+- Goal progress and spending charts.
+- Forecast views based on upcoming bills.
+  These views were proposed during architecture discussion; their exact scope is not confirmed.
+
+## 5. Working data model
+
+The following entities were proposed, not finalized:
+
+- User, workspace, workspace membership.
+- Account, transaction, optional transaction split.
+- Merchant, category, tag, transaction-tag relationship.
+- Budget, goal.
+- Recurring bill, bill occurrence, linked payment.
+- Import batch, import row, matching/reconciliation decision.
+- Receipt attachment, extraction job, extraction result, expense draft.
+- Operation identifiers, record versions, and change history where required.
+
+All shared financial records should have an explicit ownership/workspace scope. A local pending change must remain distinguishable from accepted shared state.
+
+## 6. Non-functional requirements and proposed safeguards
+
+### Performance
+
+User requirement: the application should feel fast and instant with large transaction and currency datasets.
+Proposed techniques: local reads, indexed queries, virtualized lists, bounded pagination, incremental sync, precomputed summaries, and background processing. Numerical performance targets are not yet defined.
+
+### Reliability
+
+Proposed safeguards: durable offline writes, retry-safe operations, atomic financial changes, explicit conflicts, recoverable import/extraction failures, backups, and restoration testing.
+
+### Security and privacy
+
+Proposed safeguards: workspace-scoped authorization, protected credentials, private receipt storage, account-switch cleanup, local data-retention rules, and documented third-party document-processing practices.
+Revocation cannot retroactively remove data already viewed or retained on a disconnected device.
+
+### Cross-platform quality
+
+Test persistence, synchronization, camera capture, native integrations, and large-data performance on real devices and packaged applications. Shared code does not imply identical layouts or native widgets on every platform.
+
+## 7. Technology discussion — no final stack selected
+
+### User preference
+
+- React ecosystem.
+- Native-feeling performance, especially on mobile.
+
+### Latest proposed architecture to evaluate
+
+- Mobile: Expo and React Native.
+- Web: React and Vite.
+- Desktop: Tauri wrapping the web interface, only if web-rendered desktop UI is acceptable.
+- Local database/synchronization: SQLite via a managed synchronization solution such as PowerSync.
+- Shared backend database: PostgreSQL candidate.
+- Write API: small TypeScript service; Fastify proposed.
+- Shared framework-independent financial domain package.
+- Receipt processing: private object storage plus asynchronous extraction worker.
+
+### Alternatives discussed, not selected
+
+- React Native Windows/macOS for native desktop UI.
+- NestJS if backend complexity warrants its conventions.
+- GraphQL if flexible data projections become a demonstrated need.
+- Yjs for collaborative document-like features; not preferred as the primary financial store in the latest proposal.
+- Amazon Textract or Azure Document Intelligence for receipt extraction, subject to representative benchmarking.
+
+### Important caveats
+
+No provider or framework has been validated against Quilt’s workload. PowerSync’s dedicated Tauri SDK was identified as alpha during the discussion. Platform maturity, licensing, hosting cost, deployment constraints, and provider suitability require fresh verification before selection.
+
+## 8. Proposed first validation slice
+
+1. Two people join one workspace.
+2. One creates a merchant, category, and expense offline.
+3. The other independently adds tags.
+4. Reconnection preserves valid independent changes.
+5. Concurrent amount edits produce a visible, recoverable conflict.
+6. An import matches an existing manual expense without duplication.
+7. A receipt produces a reviewable draft and can attach to an existing transaction.
+8. A monthly bill links to a payment without double-counting.
+9. Retries, application restarts, rejected writes, and revoked membership behave safely.
+10. Large histories remain responsive on target devices.
+
+This is a proposed validation scope, not an agreed MVP or delivery schedule.
+
+## 9. Decisions still needed
+
+- First-release platform priority and supported desktop operating systems.
+- Offline read/write requirements and duration.
+- Workspace roles, invitations, and ownership transfer.
+- Accounts and transaction types to support initially.
+- Import formats and whether automatic bank connections are in scope.
+- Currencies, target markets/languages, exchange-rate policy, and rounding rules.
+- Budget periods, rollover, goal funding, and split categorization.
+- Bill reminders, recurrence rules, and forecast behavior.
+- Receipt review requirements, item-level extraction, and processing provider.
+- Privacy jurisdiction, retention, encryption, export, and deletion policies.
+- Expected dataset sizes, concurrent users, processing volume, and measurable latency targets.
+- Hosting budget and operational capacity.
+- Trademark, domain, and app-store availability for Quilt.
+
+## 10. Source notes
+
+This is primarily a consolidation of the product conversation, not new technical research. External documentation referenced during the discussion includes:
+
+- https://docs.powersync.com/intro/setup-guide
+- https://docs.powersync.com/handling-writes/writing-client-changes
+- https://docs.powersync.com/client-sdks/reference/tauri
+- https://www.postgresql.org/docs/current/ddl-constraints.html
+- https://docs.aws.amazon.com/textract/latest/dg/invoices-receipts.html
+- https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/
+  Technology capabilities and maturity should be rechecked at implementation time.

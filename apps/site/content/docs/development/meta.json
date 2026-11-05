@@ -1,0 +1,11 @@
+{
+  "title": "Development",
+  "pages": [
+    "workspace",
+    "code-quality",
+    "domain-package",
+    "design-system",
+    "app-navigation",
+    "site"
+  ]
+}

@@ -1,0 +1,107 @@
+---
+title: Glossary
+description: The shared language for Quilt households and financial activity.
+---
+
+Quilt brings a household’s spending, monthly plans, and yearly goals into a
+shared picture of its money.
+
+## People and ownership
+
+**User**:
+A person who can belong to one or more workspaces.
+_Avoid_: Account when referring to a person’s identity.
+
+**Workspace**:
+A shared boundary for one household’s financial records and membership.
+_Avoid_: Account, group.
+
+**Membership**:
+A user’s access to a workspace as an owner, editor, or viewer. An owner manages
+membership, owners and editors edit shared finances, and viewers only read.
+
+**Financial account**:
+A workspace’s record of money held or owed, denominated in one currency.
+_Avoid_: User account, workspace balance.
+
+## Actual activity
+
+**Money**:
+An exact amount together with its currency. Amounts in different currencies
+are distinct financial quantities until explicitly converted.
+
+**Transaction**:
+An actual or pending financial movement classified as an expense, income,
+refund, or transfer.
+_Avoid_: Bill, receipt, contribution when describing all transactions.
+
+**Allocation**:
+A portion of an expense, income, or refund assigned to a category or left
+uncategorized. Allocations together account for the entire transaction amount.
+_Avoid_: Split when referring to who owes a share of an expense.
+
+**Refund**:
+Money returned for an expense, optionally linked to its original transaction.
+It reduces expense spending rather than becoming ordinary income.
+
+**Transfer**:
+One movement between two distinct accounts in the same workspace, retaining
+both amounts when currencies differ. It is neither household income nor spending.
+
+**Merchant**:
+A user-managed business or counterparty associated with a transaction.
+
+**Category**:
+A user-managed classification for income or expense allocations.
+_Avoid_: Tag when describing the classification used for a budget.
+
+**Tag**:
+An optional label used to organize transactions independently of categories.
+
+**Conversion quote**:
+A dated, attributed rate for converting one currency into another. It does not
+replace the original amount or establish that a transfer executed at that rate.
+
+## Plans and commitments
+
+**Budget**:
+A household’s spending plan for one calendar month, expressed in a planning
+currency and divided into category limits.
+_Avoid_: Account balance, forecast.
+
+**Goal**:
+A household’s target amount for a calendar year, measured in a goal currency.
+_Avoid_: Account balance.
+
+**Goal contribution**:
+An allocation of progress toward a goal, optionally linked to an existing
+transaction. It does not move money by itself.
+
+**Recurring bill**:
+A monthly payment expectation that produces dated bill occurrences.
+_Avoid_: Transaction when describing a payment expectation.
+
+**Bill occurrence**:
+One dated expectation from a recurring bill. Actual payments are linked
+transactions, not additional spending created by the occurrence itself.
+
+## Evidence and intake
+
+**Import batch**:
+One attempt to bring source financial records into a workspace.
+
+**Import row**:
+One source record in an import batch, retaining its identity and any decision
+to create, match, or ignore a transaction.
+
+**Receipt attachment**:
+A private document associated with a workspace, optionally linked to a
+transaction. A receipt or invoice alone does not establish that payment occurred.
+
+**Extraction result**:
+The original facts and uncertainty returned by document processing, separate
+from a person’s corrections.
+
+**Expense draft**:
+A reviewable proposal for an expense, potentially incomplete and supported by
+a receipt. It becomes a transaction only through an explicit acceptance decision.

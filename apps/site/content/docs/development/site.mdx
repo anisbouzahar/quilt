@@ -1,0 +1,81 @@
+---
+title: Site and documentation
+description: Maintain the Next.js landing page and the canonical Fumadocs content.
+---
+
+Next.js App Router landing page and Fumadocs documentation, alongside the Expo
+application and NestJS API in the pnpm workspace.
+
+```sh
+# From the repository root
+pnpm dev:site
+pnpm build:site
+pnpm --filter @quilt/site start
+```
+
+Development and production serving use port **3001**. The API keeps port 3000,
+and Expo keeps its own development port.
+
+| URL                     | Content                                                              |
+| ----------------------- | -------------------------------------------------------------------- |
+| `/`                     | Quilt landing page and clearly labelled illustrative product preview |
+| `/docs`                 | Documentation home                                                   |
+| `/docs/getting-started` | Monorepo setup and commands                                          |
+| `/docs/households`      | Roles, workspaces, original currencies and editing direction         |
+| `/docs/architecture`    | App/package boundaries and persistence status                        |
+| `/docs/domain-model`    | Canonical first-pass model and financial rules                       |
+| `/docs/project-status`  | Working foundations versus planned features                          |
+| `/docs/glossary`        | Shared domain vocabulary                                             |
+| `/docs/product-scope`   | Original product scope and proposals                                 |
+| `/docs/development/*`   | Workspace, domain, UI, navigation, and site guides                   |
+| `/api/search`           | Fumadocs server search endpoint                                      |
+
+## Content
+
+All project documentation lives under `apps/site/content/docs`. Write MDX there
+and order pages using `meta.json`. The collection is defined in
+`apps/site/source.config.ts`. `fumadocs-mdx` generates the ignored
+`apps/site/.source` files during installation, development and the typecheck script. Next.js builds
+prerender known document pages and retain the search endpoint as a server route.
+Unknown documentation slugs return a 404.
+
+Keep product claims aligned with the actual implementation. The landing preview
+uses illustrative data, and there is no waitlist, contact form, authentication,
+analytics, payment flow or production financial connection in this starter.
+The [domain model](/docs/domain-model), [glossary](/docs/glossary), and
+[original product scope](/docs/product-scope) are maintained directly in this
+content folder. Update these pages instead of creating documentation elsewhere
+in the repository.
+
+## Styling
+
+The site uses Tailwind CSS 4 and semantic HTML, with Fumadocs for its navigation,
+search, documentation shell, and device-following light/dark theme. Its palette
+comes from `@quilt/ui/tokens`, a pure entry point that excludes native UI imports.
+Application Tamagui components continue to live in `@quilt/ui`. The site keeps
+its Tailwind build separate from Tamagui's runtime utilities.
+
+The full logo supplied by the user is retained in `apps/site/assets/quilt-logo.svg`.
+`apps/site/public/quilt-logo.svg` adds a viewBox for responsive rendering; the light-theme
+variant changes only the white wordmark fill to Quilt’s charcoal. The shared
+`Brand` component displays the complete vector artwork in the site header,
+documentation navigation, and footer. Keep both variants in sync with the source.
+The browser icon remains the square app icon from `apps/mobile/assets`.
+
+## Checks and deployment
+
+`pnpm check` includes this app in ESLint (including Next.js rules), TypeScript,
+and Prettier checks. Next.js type generation and MDX source generation run before
+its standalone TypeScript check. Root domain tests remain part of `pnpm check`.
+
+Build with `pnpm build:site`, then serve with the start command above. A Node.js
+Next.js runtime is required for `/api/search`; no static export or hosting
+provider is configured. The site runs locally without API/database credentials
+and does not publish or collect visitor data.
+
+Versions were checked against the npm stable tags when this starter was added:
+Next.js 16.4.5, Fumadocs UI/Core 16.18.0, and Fumadocs MDX 15.5.0. Dependencies are
+pinned in `package.json` and resolved in the shared lockfile.
+
+References: [Next.js installation](https://nextjs.org/docs/app/getting-started/installation),
+[Fumadocs Next.js setup](https://www.fumadocs.dev/docs/manual-installation/next).

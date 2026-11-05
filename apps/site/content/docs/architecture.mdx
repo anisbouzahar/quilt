@@ -1,0 +1,55 @@
+---
+title: Architecture
+description: One pnpm monorepo, with separate public, application, and API surfaces.
+---
+
+## Applications
+
+| Application   | Responsibility                                           |
+| ------------- | -------------------------------------------------------- |
+| `apps/site`   | Next.js landing page and Fumadocs documentation          |
+| `apps/mobile` | Expo application for iOS, Android, and the web companion |
+| `apps/api`    | NestJS backend and future financial command endpoints    |
+
+The Next.js app uses the App Router. `/` is the public landing page, `/docs`
+hosts MDX documentation, and `/api/search` serves the documentation search index.
+The NestJS API is a separate application, not a dependency of the landing page.
+
+## Shared packages
+
+| Package            | Responsibility                                                       |
+| ------------------ | -------------------------------------------------------------------- |
+| `@quilt/domain`    | Framework-independent models, exact money arithmetic, and pure rules |
+| `@quilt/contracts` | Shared API types; currently the health response                      |
+| `@quilt/ui`        | Tamagui controls and shared visual tokens                            |
+| `@quilt/db`        | Server-only Drizzle and PostgreSQL access                            |
+
+The public site imports the pure `@quilt/ui/tokens` entry point to reuse Quilt’s
+palette. It renders semantic HTML and Tailwind CSS, while the application uses
+Tamagui for its shared native/web controls. This keeps native rendering code
+out of the public site’s server component tree.
+
+## Domain and database boundaries
+
+The domain records are not Drizzle rows or request DTOs. Dedicated API and
+persistence adapters must validate input, authorize access, and map those
+records to database constraints.
+
+The database currently contains an initial workspace table. Financial tables,
+atomic version checks, idempotent commands, and audit history are future work.
+A working domain validator does not establish server authorization.
+
+## Local development ports
+
+- Site and documentation: `3001`.
+- NestJS API: `3000`.
+- Expo: the port printed by its development server.
+
+## Production
+
+`pnpm build:site` produces a Next.js production build. Run it with
+`pnpm --filter @quilt/site start` after building. The search route requires a
+Next.js server runtime; this setup is not a static HTML export.
+
+No hosting provider, public domain, analytics, or data collection is configured
+by this starter.

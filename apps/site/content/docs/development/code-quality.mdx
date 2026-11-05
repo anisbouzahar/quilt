@@ -1,0 +1,177 @@
+---
+title: Shared tooling configuration
+description: Reusable TypeScript, ESLint, and Prettier presets with platform-specific extensions.
+---
+
+## Shared packages and local extensions
+
+Three workspace packages own the common configuration:
+
+| Package                    | Responsibility                                                                     |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `@quilt/typescript-config` | Common compiler settings and Node, library, React library, and Next.js presets     |
+| `@quilt/eslint-config`     | Base rules, type-aware checks, and Node, domain, React Native, and Next.js presets |
+| `@quilt/prettier-config`   | Formatting options for all supported file types                                    |
+
+Each app and library declares these packages as `workspace:*` development
+dependencies. Its local configuration selects a preset and holds settings that
+depend on that project. ESLint, TypeScript, and Prettier executables are pinned
+at the root through the shared lockfile; ESLint plugins live in the shared
+ESLint package.
+
+ESLint checks code correctness. Prettier owns formatting. Prettier is the editor
+formatter, and ESLint fixes run separately, so two formatters do not compete.
+
+## TypeScript inheritance
+
+All presets inherit strict checking, `noUncheckedIndexedAccess`, and common
+compiler options from `@quilt/typescript-config/base.json`.
+
+| Consumer                    | Preset                                        |
+| --------------------------- | --------------------------------------------- |
+| NestJS API                  | `@quilt/typescript-config/node.json`          |
+| Contracts, domain, database | `@quilt/typescript-config/library.json`       |
+| Shared UI                   | `@quilt/typescript-config/react-library.json` |
+| Next.js site                | `@quilt/typescript-config/nextjs.json`        |
+| Expo                        | Expo's base followed by Quilt's common base   |
+
+For example, a library keeps its file paths local:
+
+```json
+{
+  "extends": "@quilt/typescript-config/library.json",
+  "compilerOptions": { "rootDir": "src", "outDir": "dist" },
+  "include": ["src/**/*.ts"]
+}
+```
+
+Expo retains its framework defaults through multiple inheritance:
+
+```json
+{
+  "extends": ["expo/tsconfig.base", "@quilt/typescript-config/base.json"]
+}
+```
+
+The later entry overrides common safety settings. Expo still supplies its
+module resolution, native conditions, and exclusions. NestJS decorator options,
+Next.js path aliases, and project-specific include/output paths stay in the
+consumer's `tsconfig.json`.
+
+## Shared rules, appropriate platform checks
+
+| Scope                                                | Checks                                                                                    |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| All JavaScript/TypeScript                            | Shared base rules and unused-variable conventions                                         |
+| App and package TypeScript source                    | Strict type-aware rules, including unsafe types and unhandled promises                    |
+| Expo and the shared UI                               | React Hooks, React Native globals, and server-only import restrictions                    |
+| Next.js site                                         | React Hooks, Next.js recommended/Core Web Vitals rules, and explicit site-root resolution |
+| NestJS API and database code                         | Node globals and applicable TypeScript rules                                              |
+| Supported source/configuration/documentation formats | The same shared Prettier options                                                          |
+
+Framework-specific rules stay scoped to their app. For example, the API does
+not receive React Hooks rules and React Native components do not receive
+Next.js DOM rules. Code inside Markdown/MDX fences is formatted by Prettier;
+ESLint does not parse documentation or CSS as JavaScript.
+
+Every app and library has a small `eslint.config.mjs` selecting a preset:
+
+```js
+import { next } from '@quilt/eslint-config';
+
+export default next({ projectDir: import.meta.dirname });
+```
+
+The presets accept `typedFiles` and `extraIgnores` for project-specific scope.
+They return flat configuration arrays, so a consumer can append a local
+override with ESLint's `defineConfig` when needed. Common rule changes belong in
+`packages/eslint-config/index.mjs`. ESLint 10 discovers the nearest configuration
+for each file, including during a root `eslint .` run. The root configuration
+uses the common base for workspace tooling and configuration-package sources.
+
+## Prettier inheritance
+
+Each app and library selects the shared configuration in `package.json`:
+
+```json
+{
+  "prettier": "@quilt/prettier-config"
+}
+```
+
+The root `prettier.config.mjs` re-exports that same preset. Change common options
+in `packages/prettier-config/index.mjs`. If a project needs a formatting
+exception, replace its `package.json` selection with a local
+`prettier.config.mjs` that imports and spreads the shared object.
+
+The root `.prettierignore` and `.editorconfig` remain workspace-wide. Ignore
+patterns are separate from Prettier's shareable options; package scripts
+explicitly select the root ignore file so generated files stay excluded from
+either working directory.
+
+## Workspace commands
+
+From the repository root:
+
+```sh
+pnpm lint
+pnpm lint:fix
+pnpm format
+pnpm format:check
+pnpm check
+```
+
+The root lint commands build shared package declarations before type-aware
+linting. `pnpm check` also runs type checks, domain tests, and formatting checks.
+
+## App and package commands
+
+All seven runtime apps/libraries expose the same four lint/format scripts. Run them
+inside the relevant directory or select a package from the root:
+
+```sh
+pnpm --filter @quilt/site lint
+pnpm --filter @quilt/mobile format:check
+pnpm --filter @quilt/domain lint:fix
+
+# Equivalent when already inside apps/site:
+pnpm lint
+pnpm format:check
+```
+
+Package commands operate on that package and discover its local configuration,
+which extends the shared presets. Type-aware linting of apps that consume shared
+packages needs current package declarations: run `pnpm build:packages` after a
+fresh install or after changing shared types. The three configuration packages
+have no build step; root linting and formatting cover their source files.
+
+To check each package through its own scripts:
+
+```sh
+pnpm build:packages
+pnpm -r lint
+pnpm -r format:check
+```
+
+## Editor integration
+
+Open the repository root in VS Code or a compatible editor. The shared
+`.vscode/settings.json` enables Prettier formatting on save and ESLint fixes on
+explicit save, detects ESLint working directories, and lets Prettier discover
+each local configuration while using the root ignore file.
+`.vscode/extensions.json` recommends the ESLint
+and Prettier extensions; it does not install them automatically.
+
+`.editorconfig` shares indentation and line endings, preserving meaningful
+trailing spaces in both Markdown and MDX. Other editors should use the same
+shared tool configurations.
+
+## Generated files
+
+Build outputs, dependency directories, caches, Expo/Next.js generated files,
+Fumadocs `.source`, and generated Drizzle migrations are excluded as appropriate.
+Both the site’s `next-env.d.ts` and Expo’s `expo-env.d.ts` are excluded from
+formatting and linting.
+
+Keep reusable settings in the three shared packages and project-specific
+exceptions in the consuming configuration.

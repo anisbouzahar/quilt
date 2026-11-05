@@ -1,0 +1,44 @@
+---
+title: App navigation
+description: Expo Router routes, floating navigation, menus, and drawers.
+---
+
+Expo Router owns the entry point (`expo-router/entry`) and discovers routes in
+`apps/mobile/src/app`. The root layout installs safe areas, appearance, and Tamagui once.
+The `(main)` group uses JavaScript tabs with a custom floating bar; it becomes a
+rail at 1024px. The bar follows the router's state and tab events. Mobile tab
+history and browser URLs/back are handled by Expo Router.
+
+| URL              | Screen                                         |
+| ---------------- | ---------------------------------------------- |
+| `/`              | Household overview                             |
+| `/spending`      | Sample transactions and category filter        |
+| `/budgets`       | Sample monthly plans                           |
+| `/goals`         | Sample savings goal                            |
+| `/design-system` | Original interactive component gallery         |
+| `/settings`      | Session appearance preference and demo details |
+
+The last two pages are available through the navigation drawer. Unknown routes
+show a recovery link. `quilt://spending` is the equivalent native deep link;
+the `quilt` scheme requires a rebuilt development/production app, not Expo Go.
+
+`apps/mobile/src/components/app-shell.tsx` owns navigation and the expense preview drawer.
+`apps/mobile/src/screens` owns page content. New routes go in `apps/mobile/src/app`; add primary tabs to
+the destinations list in the shell. Keep routing and financial features out of
+`@quilt/ui`: it owns only the reusable `IconButton`, `ActionMenu`, and `Drawer`
+primitives. Menus use Tamagui Menu on desktop web and a modal drawer on smaller
+web/native screens. Drawers support Escape/outside dismissal on web, Android
+back, scrolling, and keyboard avoidance. They do not implement swipe gestures.
+
+Appearance follows the device by default; overrides last for the app session.
+Financial figures and expense previews are demo-only and are not persisted.
+Connect authenticated NestJS endpoints before implementing saved records.
+
+`expo export` currently produces a single-page web app. Production hosting must
+serve `index.html` for application URLs such as `/spending` (while serving real
+asset files normally), so direct links and refreshes work. No deployment is
+configured by this change.
+
+Validation: `pnpm check`, `expo export --platform all`, and browser checks at
+390px and 1200px. Native exports validate bundles; simulator/device checks for
+safe areas, back, screen readers, and keyboards are still required.
