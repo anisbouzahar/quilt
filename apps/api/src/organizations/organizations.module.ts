@@ -7,4 +7,3 @@ import { OrganizationsController } from './organizations.controller';
   controllers: [OrganizationsController],
 })
 export class OrganizationsModule {}
-

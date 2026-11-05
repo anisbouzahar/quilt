@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
@@ -7,20 +7,14 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableShutdownHooks();
 
-  const origins = (process.env.CORS_ORIGINS ?? 'http://localhost:8081')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  const config = app.get(ConfigService);
+  const origins = config.getOrThrow<string[]>('CORS_ORIGIN_LIST');
+  const port = config.getOrThrow<number>('PORT');
 
   app.enableCors({
     origin: origins,
     credentials: true,
   });
-
-  const port = Number(process.env.PORT ?? 3000);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error('PORT must be an integer between 1 and 65535');
-  }
 
   await app.listen(port, '0.0.0.0');
 }

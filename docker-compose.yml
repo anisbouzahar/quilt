@@ -27,6 +27,27 @@ services:
       options:
         max-size: '10m'
         max-file: '3'
+
+  redis:
+    image: redis:7-alpine
+    container_name: quilt-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
   mailpit:
     image: axllent/mailpit:v1
     container_name: quilt-mailpit
@@ -45,3 +66,5 @@ services:
 volumes:
   postgres_data:
     name: quilt_postgres_data
+  redis_data:
+    name: quilt_redis_data

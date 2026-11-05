@@ -16,7 +16,7 @@ export const CreateOrganizationSchema = z.object({
       'Slug must only contain lowercase alphanumeric characters and hyphens',
     )
     .optional(),
-  logo: z.string().url('Logo must be a valid URL').nullable().optional(),
+  logo: z.url('Logo must be a valid URL').nullable().optional(),
 });
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationSchema>;
 
@@ -29,12 +29,12 @@ export const UpdateOrganizationSchema = z.object({
     .max(50)
     .regex(/^[a-z0-9-]+$/)
     .optional(),
-  logo: z.string().url().nullable().optional(),
+  logo: z.url().nullable().optional(),
 });
 export type UpdateOrganizationInput = z.infer<typeof UpdateOrganizationSchema>;
 
 export const InviteMemberSchema = z.object({
-  email: z.string().trim().email('Invalid email address'),
+  email: z.email('Invalid email address'),
   role: z.enum(['admin', 'member', 'owner']).default('member'),
 });
 export type InviteMemberInput = z.infer<typeof InviteMemberSchema>;

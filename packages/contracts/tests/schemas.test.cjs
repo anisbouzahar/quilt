@@ -80,4 +80,3 @@ test('PaginationQuerySchema coerces strings and provides defaults', () => {
   assert.equal(parsedCoerced.page, 3);
   assert.equal(parsedCoerced.limit, 50);
 });
-
