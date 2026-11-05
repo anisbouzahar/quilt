@@ -52,20 +52,41 @@ test('InviteMemberSchema validates email and role', () => {
   assert.equal(invalidRole.success, false);
 });
 
-test('SignUpWithEmailSchema requires 8+ char password and valid email', () => {
+test('SignUpWithEmailSchema enforces strong password policy and valid email', () => {
   const valid = SignUpWithEmailSchema.safeParse({
     name: 'Jane Doe',
     email: 'jane@example.com',
-    password: 'securepassword123',
+    password: 'SecureP@ssword123',
   });
   assert.equal(valid.success, true);
 
   const shortPassword = SignUpWithEmailSchema.safeParse({
     name: 'Jane Doe',
     email: 'jane@example.com',
-    password: 'short',
+    password: 'Sh0rt!1',
   });
   assert.equal(shortPassword.success, false);
+
+  const noUppercase = SignUpWithEmailSchema.safeParse({
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: 'securep@ssword123',
+  });
+  assert.equal(noUppercase.success, false);
+
+  const noNumber = SignUpWithEmailSchema.safeParse({
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: 'SecureP@ssword!',
+  });
+  assert.equal(noNumber.success, false);
+
+  const noSpecialChar = SignUpWithEmailSchema.safeParse({
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    password: 'SecurePassword123',
+  });
+  assert.equal(noSpecialChar.success, false);
 });
 
 test('PaginationQuerySchema coerces strings and provides defaults', () => {

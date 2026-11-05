@@ -2,7 +2,12 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const storeModule = import('../src/state/create-app-store.ts');
 const session = {
-  user: { id: 'person-a', name: 'Alex', email: 'alex@example.com' },
+  user: {
+    id: 'person-a',
+    name: 'Alex',
+    email: 'alex@example.com',
+    emailVerified: true,
+  },
   session: { id: 'session-a' },
 };
 const household = { id: 'home-a', name: 'Our place' };
@@ -10,8 +15,13 @@ function fakeClient(overrides = {}) {
   return {
     auth: {
       getSession: async () => session,
-      signIn: async () => session,
-      register: async () => session,
+      signIn: async () => ({ status: 'authenticated', session }),
+      register: async (input) => ({
+        status: 'verification-required',
+        email: input.email,
+      }),
+      resendVerification: async () => {},
+      verifyEmail: async () => {},
       signOut: async () => {},
       subscribe: () => () => {},
       ...overrides.auth,
@@ -118,4 +128,84 @@ test('failed sign-out keeps the existing session available for a retry', async (
   await assert.rejects(store.getState().signOut());
   assert.equal(store.getState().session, session);
   assert.equal(store.getState().authPending, false);
+});
+
+test('registration waits for verification and never loads a household', async () => {
+  const { createAppStore } = await storeModule;
+  let lists = 0;
+  const store = createAppStore(
+    fakeClient({
+      households: {
+        list: async () => {
+          lists++;
+          return [];
+        },
+      },
+    }),
+  );
+  const outcome = await store.getState().register({
+    name: 'Alex',
+    email: 'alex@example.com',
+    password: 'password',
+  });
+  assert.equal(outcome.status, 'verification-required');
+  assert.equal(store.getState().session, null);
+  assert.equal(store.getState().verificationEmail, 'alex@example.com');
+  assert.equal(lists, 0);
+});
+
+test('restored unverified sessions cannot expose household data', async () => {
+  const { createAppStore } = await storeModule;
+  const store = createAppStore(
+    fakeClient({
+      auth: {
+        getSession: async () => ({
+          ...session,
+          user: { ...session.user, emailVerified: false },
+        }),
+      },
+    }),
+  );
+  await store.getState().refreshSession();
+  assert.equal(store.getState().session, null);
+  assert.equal(store.getState().verificationEmail, session.user.email);
+  assert.deepEqual(store.getState().households, []);
+});
+
+test('resends share a cooldown and verification does not manufacture a session', async () => {
+  const { createAppStore } = await storeModule;
+  let sends = 0;
+  const store = createAppStore(
+    fakeClient({
+      auth: {
+        resendVerification: async () => {
+          sends++;
+        },
+      },
+    }),
+  );
+  await store.getState().resendVerification('alex@example.com');
+  await store.getState().resendVerification('alex@example.com');
+  assert.equal(sends, 1);
+  assert.equal(store.getState().verificationStatus, 'sent');
+  await store.getState().verifyEmail('test-token');
+  assert.equal(store.getState().verificationStatus, 'verified');
+  assert.equal(store.getState().session, null);
+});
+
+test('invalid verification links surface a recoverable error', async () => {
+  const { createAppStore } = await storeModule;
+  const store = createAppStore(
+    fakeClient({
+      auth: {
+        verifyEmail: async () => {
+          throw new Error('expired');
+        },
+      },
+    }),
+  );
+  await store.getState().verifyEmail('expired-token');
+  assert.equal(store.getState().verificationStatus, 'error');
+  assert.match(store.getState().verificationError, /expired/);
+  assert.equal(store.getState().session, null);
 });

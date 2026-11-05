@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { fromNodeHeaders } from 'better-auth/node';
@@ -42,6 +43,8 @@ export class AuthGuard implements CanActivate {
     if (!session) {
       throw new UnauthorizedException('Authentication required');
     }
+    if (!session.user.emailVerified)
+      throw new ForbiddenException('Email verification required');
 
     request.user = session.user;
     request.session = session.session;

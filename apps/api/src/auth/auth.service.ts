@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../database/database.service';
 import { RedisService } from '../redis/redis.service';
+import { MailService } from '../mail/mail.service';
 import { createAuth, type AuthInstance } from './auth';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class AuthService {
     private readonly databaseService: DatabaseService,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
+    private readonly mailService: MailService,
   ) {}
 
   get auth(): AuthInstance {
@@ -29,6 +31,8 @@ export class AuthService {
         'GOOGLE_CLIENT_SECRET',
       ),
       redisService: this.redisService,
+      sendVerificationEmail: (input) =>
+        this.mailService.sendVerificationEmail(input),
     });
     return this._auth;
   }

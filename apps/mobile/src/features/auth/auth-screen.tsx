@@ -1,5 +1,5 @@
 import { useRef, useState, type ComponentRef } from 'react';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ClientError } from '../../lib/client';
 import { useAppStore } from '../../state/app-store';
 import { AuthLayout } from './components/auth-layout';
@@ -46,6 +46,7 @@ function validate(mode: AuthMode, values: Values) {
 
 export function AuthScreen({ mode }: { mode: AuthMode }) {
   const { colors } = useQuiltTheme();
+  const router = useRouter();
   const [values, setValues] = useState<Values>({
     name: '',
     email: '',
@@ -88,9 +89,11 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
           email: values.email.trim(),
           password: values.password,
         };
-        if (isSignUp)
-          await register({ ...credentials, name: values.name.trim() });
-        else await signIn(credentials);
+        const outcome = isSignUp
+          ? await register({ ...credentials, name: values.name.trim() })
+          : await signIn(credentials);
+        if (outcome.status === 'verification-required')
+          router.replace('/verify-email');
         setValues({ name: '', email: '', password: '' });
       } catch (error: unknown) {
         setSubmissionError(
@@ -177,7 +180,11 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
               onChangeText={(value) => change('password', value)}
               onBlur={() => blur('password')}
               error={errors.password}
-              hint={isSignUp ? 'At least 8 characters.' : undefined}
+              hint={
+                isSignUp
+                  ? '10+ characters with uppercase, lowercase, number & symbol.'
+                  : undefined
+              }
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
               textContentType={isSignUp ? 'newPassword' : 'password'}
               returnKeyType="go"

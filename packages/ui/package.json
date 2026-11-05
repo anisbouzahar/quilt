@@ -16,6 +16,10 @@
     "./tokens": {
       "types": "./dist/tokens.d.ts",
       "default": "./dist/tokens.js"
+    },
+    "./email": {
+      "types": "./dist/email.d.ts",
+      "default": "./dist/email.js"
     }
   },
   "scripts": {
@@ -41,7 +45,8 @@
     "tamagui": "3.2.2",
     "@tamagui/config": "3.2.2",
     "@tamagui/tailwind": "3.2.2",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "react-email": "6.11.6"
   },
   "type": "module",
   "prettier": "@quilt/prettier-config"

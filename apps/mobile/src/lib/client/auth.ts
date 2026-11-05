@@ -3,6 +3,13 @@ import type { RawAuthClient } from './auth-client';
 import { ClientError, throwResponseError } from './errors';
 
 export type Session = AuthSession;
+export type AuthOutcome =
+  | { status: 'authenticated'; session: Session }
+  | {
+      status: 'verification-required';
+      email: string;
+      verificationEmailSent?: boolean;
+    };
 
 export function createAuthApi(authClient: RawAuthClient) {
   async function getSession(): Promise<Session | null> {
@@ -28,15 +35,39 @@ export function createAuthApi(authClient: RawAuthClient) {
   return {
     getSession,
     requireSession,
-    async signIn(input: { email: string; password: string }) {
+    async signIn(input: {
+      email: string;
+      password: string;
+    }): Promise<AuthOutcome> {
       const result = await authClient.signIn.email(input);
+      if (result.error?.code === 'EMAIL_NOT_VERIFIED')
+        return { status: 'verification-required', email: input.email };
       throwResponseError(result.error);
-      return requireSession();
+      const session = await requireSession();
+      return session.user.emailVerified
+        ? { status: 'authenticated', session }
+        : { status: 'verification-required', email: input.email };
     },
-    async register(input: { name: string; email: string; password: string }) {
+    async register(input: {
+      name: string;
+      email: string;
+      password: string;
+    }): Promise<AuthOutcome> {
       const result = await authClient.signUp.email(input);
       throwResponseError(result.error);
-      return requireSession();
+      return {
+        status: 'verification-required',
+        email: input.email,
+        verificationEmailSent: true,
+      };
+    },
+    async resendVerification(email: string) {
+      const result = await authClient.sendVerificationEmail({ email });
+      throwResponseError(result.error);
+    },
+    async verifyEmail(token: string) {
+      const result = await authClient.verifyEmail({ query: { token } });
+      throwResponseError(result.error);
     },
     async signOut() {
       const result = await authClient.signOut();

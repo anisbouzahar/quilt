@@ -1,0 +1,103 @@
+---
+title: Email verification and delivery
+description: SMTP, React Email templates, shared design components, and account verification.
+---
+
+Email/password accounts must confirm their email before using a household.
+Registration sends an email and opens `/verify-email`; it does not create a
+session. An unverified sign-in opens the same screen. Signed links expire after
+one hour. The email link opens a page with a **Confirm my email** button, so
+loading or previewing the link alone does not verify an account.
+
+After confirmation, the user signs in with their password. Verification does not
+automatically create a session or switch the browser to another account. The
+confirmation route remains accessible even if another account is already signed
+in. Invalid/expired links show recovery text and an email field to request a new
+link. Resends use generic responses to avoid revealing account existence.
+
+## SMTP service
+
+`apps/api/src/mail` exports `MailModule` and `MailService`. Delivery uses a lazily
+created Nodemailer SMTP transport, with connection timeouts and certificate
+validation. Templates are rendered before sending, and both HTML and plain text
+are delivered. SMTP rejection or connection failure propagates as a delivery
+failure; credentials, recipients, and verification tokens are not logged.
+
+Development defaults use the existing Mailpit container:
+
+```sh
+docker compose up -d mailpit
+```
+
+Open [Mailpit](http://localhost:8025/) to inspect local messages. Mailpit captures
+messages locally; it does not deliver them to external inboxes.
+
+Configure the API environment using `apps/api/.env.example`:
+
+| Variable                      | Local default           | Production                                               |
+| ----------------------------- | ----------------------- | -------------------------------------------------------- |
+| `APP_URL`                     | `http://localhost:8082` | Required HTTPS app URL hosting `/verify-email`           |
+| `SMTP_HOST`                   | `localhost`             | Required SMTP server                                     |
+| `SMTP_PORT`                   | `1025`                  | `587`, or `465` with implicit TLS                        |
+| `SMTP_SECURE`                 | `false`                 | `true` for port 465; otherwise STARTTLS                  |
+| `SMTP_REQUIRE_TLS`            | `false`                 | Enabled by default; TLS is required                      |
+| `SMTP_USER` / `SMTP_PASSWORD` | Unset                   | Configure both when the provider requires authentication |
+| `MAIL_FROM`                   | `hello@quilt.local`     | Required sender address accepted by your SMTP provider   |
+
+Use port 587 with `SMTP_SECURE=false` and `SMTP_REQUIRE_TLS=true` for STARTTLS.
+Certificate verification is not disabled. Production SMTP credentials and sender
+DNS/provider configuration must come from the selected mail service.
+
+## Shared UI and templates
+
+`@quilt/ui/email` provides `EmailLayout`, `EmailCard`, `EmailHeading`, `EmailText`,
+and `EmailButton`. These reuse the existing palette, spacing, corner radii, and
+typography tokens with React Email's email-compatible HTML primitives. Native
+Tamagui controls are kept out of email rendering and the API runtime. This entry
+point is separate from the native/web control exports, so importing application
+UI does not include the email renderer.
+
+`@quilt/emails` owns `VerificationEmail` and `renderVerificationEmail`. Templates
+compose the shared email components and render to HTML plus a text alternative.
+Change a template's content there; change common visual values in the shared UI
+tokens. JSX escapes display names, and rendering rejects non-HTTP(S) links.
+
+```tsx
+import { EmailButton, EmailCard, EmailHeading } from '@quilt/ui/email';
+
+export function AccountEmail({ url }: { url: string }) {
+  return (
+    <EmailCard>
+      <EmailHeading>Confirm your email.</EmailHeading>
+      <EmailButton label="Confirm my email" href={url} />
+    </EmailCard>
+  );
+}
+```
+
+## State and enforcement
+
+All app requests still pass through the centralized client. Zustand owns the
+pending email, verification status/errors, and resend cooldown. Passwords and the
+verification token are not persisted in the store. After confirmation, the token
+is removed from the current app URL, including when the request fails.
+
+The backend requires verification for password sign-in. Both the Nest API guard
+and Better Auth organization routes also reject pre-existing unverified sessions.
+The app refuses to restore an unverified session into the protected household UI.
+Resends are limited to three requests per minute server-side, with a 60-second
+client cooldown; verification attempts are also rate limited.
+
+No schema migration is needed for this step: the existing user table already has
+`emailVerified`. Existing unverified development accounts must verify before
+signing in. Native users can verify in the web companion and then return to the
+app to sign in; universal/app links for opening the installed app directly are
+not configured here.
+
+## Checks
+
+`pnpm check` covers rendering/escaping, unsafe-link rejection, SMTP configuration,
+unverified-session guards, and verification state transitions. The complete
+registration → captured SMTP email → confirmation → verified sign-in flow is
+also tested against disposable database/Redis services and Mailpit. Native device
+and real inbox-client rendering checks remain necessary before release.

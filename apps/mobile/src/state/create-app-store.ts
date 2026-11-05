@@ -1,6 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import type { ThemePreference } from '@quilt/ui/tokens';
 import type { Household, QuiltClient, Session } from '../lib/client';
+import type { AuthOutcome } from '../lib/client/auth';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 export interface AppState {
@@ -13,6 +14,13 @@ export interface AppState {
   householdsStatus: Status;
   householdsError: string | null;
   householdPending: boolean;
+  verificationEmail: string | null;
+  verificationStatus:
+    'idle' | 'sending' | 'sent' | 'verifying' | 'verified' | 'error';
+  verificationError: string | null;
+  verificationResendAt: number;
+  resendVerification: (email: string) => Promise<void>;
+  verifyEmail: (token: string) => Promise<void>;
   setAppearance: (appearance: ThemePreference) => void;
   refreshSession: () => Promise<void>;
   signIn: QuiltClient['auth']['signIn'];
@@ -33,26 +41,49 @@ export function createAppStore(client: QuiltClient) {
       householdsError: null,
       householdPending: false,
     };
-    const authenticate = async (request: () => Promise<Session>) => {
+    const authenticate = async (request: () => Promise<AuthOutcome>) => {
       if (get().authPending)
         throw new Error('An account request is already in progress.');
       ++epoch;
       set({ authPending: true });
       try {
-        const session = await request();
-        set({
-          session,
-          sessionStatus: 'ready',
-          sessionError: null,
-          ...emptyHouseholds,
-        });
-        void get().loadHouseholds();
-        return session;
+        const outcome = await request();
+        if (outcome.status === 'verification-required') {
+          set({
+            session: null,
+            sessionStatus: 'ready',
+            sessionError: null,
+            verificationEmail: outcome.email,
+            verificationStatus: 'idle',
+            verificationError: null,
+            verificationResendAt: outcome.verificationEmailSent
+              ? Date.now() + 60000
+              : 0,
+            ...emptyHouseholds,
+          });
+        } else {
+          set({
+            session: outcome.session,
+            sessionStatus: 'ready',
+            sessionError: null,
+            verificationEmail: null,
+            verificationStatus: 'idle',
+            verificationError: null,
+            verificationResendAt: 0,
+            ...emptyHouseholds,
+          });
+          void get().loadHouseholds();
+        }
+        return outcome;
       } finally {
         set({ authPending: false });
       }
     };
     return {
+      verificationEmail: null,
+      verificationStatus: 'idle',
+      verificationError: null,
+      verificationResendAt: 0,
       appearance: 'system',
       session: null,
       sessionStatus: 'idle',
@@ -67,13 +98,17 @@ export function createAppStore(client: QuiltClient) {
         const promise = (async () => {
           if (get().sessionStatus === 'idle') set({ sessionStatus: 'loading' });
           try {
-            const session = await client.auth.getSession();
+            const restored = await client.auth.getSession();
+            const session = restored?.user.emailVerified ? restored : null;
             if (started !== epoch) return;
             const changed = session?.user.id !== get().session?.user.id;
             set({
               session,
               sessionStatus: 'ready',
               sessionError: null,
+              ...(restored && !restored.user.emailVerified
+                ? { verificationEmail: restored.user.email }
+                : {}),
               ...(changed || !session ? emptyHouseholds : {}),
             });
             if (session && (changed || get().householdsStatus === 'idle'))
@@ -105,12 +140,66 @@ export function createAppStore(client: QuiltClient) {
           await client.auth.signOut();
           set({
             session: null,
+            verificationEmail: null,
+            verificationStatus: 'idle',
+            verificationError: null,
+            verificationResendAt: 0,
             sessionStatus: 'ready',
             sessionError: null,
             ...emptyHouseholds,
           });
         } finally {
           set({ authPending: false });
+        }
+      },
+      resendVerification: async (email) => {
+        if (
+          get().verificationStatus === 'sending' ||
+          get().verificationStatus === 'verifying' ||
+          Date.now() < get().verificationResendAt
+        )
+          return;
+        const started = epoch;
+        set({
+          verificationStatus: 'sending',
+          verificationError: null,
+          verificationEmail: email,
+        });
+        try {
+          await client.auth.resendVerification(email);
+          if (started === epoch)
+            set({
+              verificationStatus: 'sent',
+              verificationResendAt: Date.now() + 60000,
+            });
+        } catch {
+          if (started === epoch)
+            set({
+              verificationStatus: 'error',
+              verificationError:
+                'We couldn’t send the email. Please wait a moment and try again.',
+            });
+        }
+      },
+      verifyEmail: async (token) => {
+        if (
+          get().verificationStatus === 'sending' ||
+          get().verificationStatus === 'verifying'
+        )
+          return;
+        const started = epoch;
+        set({ verificationStatus: 'verifying', verificationError: null });
+        try {
+          await client.auth.verifyEmail(token);
+          if (started === epoch)
+            set({ verificationStatus: 'verified', verificationEmail: null });
+        } catch {
+          if (started === epoch)
+            set({
+              verificationStatus: 'error',
+              verificationError:
+                'This link is invalid or has expired. Request a fresh one below.',
+            });
         }
       },
       loadHouseholds: async () => {

@@ -7,12 +7,13 @@ Expo Router discovers routes in `apps/mobile/src/app`. The root layout installs
 safe areas, the Zustand-backed appearance provider, and Tamagui once. It restores
 the app session through the centralized client before selecting a route group.
 
-| URL        | Access     | Screen                                                     |
-| ---------- | ---------- | ---------------------------------------------------------- |
-| `/`        | Signed out | Short introduction with create-account and sign-in actions |
-| `/sign-up` | Signed out | Registration with local validation and live submission     |
-| `/sign-in` | Signed out | Email/password login                                       |
-| `/home`    | Signed in  | Real household list or initial household creation          |
+| URL             | Access     | Screen                                                     |
+| --------------- | ---------- | ---------------------------------------------------------- |
+| `/`             | Signed out | Short introduction with create-account and sign-in actions |
+| `/sign-up`      | Signed out | Registration with local validation and live submission     |
+| `/sign-in`      | Signed out | Email/password login                                       |
+| `/verify-email` | Public     | Inbox instructions, signed-link confirmation, and resend   |
+| `/home`         | Signed in  | Real household list or initial household creation          |
 
 Expo Router's `Stack.Protected` guards switch between `(auth)` and the protected `home` screen using
 the Zustand session. Signing out removes authenticated screens from the history.

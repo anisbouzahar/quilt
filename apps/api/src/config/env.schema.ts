@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const booleanEnv = z.preprocess(
+  (value) => (value === 'true' ? true : value === 'false' ? false : value),
+  z.boolean(),
+);
+
 export const EnvSchema = z
   .object({
     NODE_ENV: z
@@ -21,13 +26,66 @@ export const EnvSchema = z
         error: 'BETTER_AUTH_SECRET is required',
       })
       .min(16, 'BETTER_AUTH_SECRET must be at least 16 characters'),
+    APP_URL: z.url().optional(),
+    SMTP_HOST: z.string().min(1).optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+    SMTP_SECURE: booleanEnv.default(false),
+    SMTP_REQUIRE_TLS: booleanEnv.optional(),
+    SMTP_USER: z.string().min(1).optional(),
+    SMTP_PASSWORD: z.string().min(1).optional(),
+    MAIL_FROM: z.email().optional(),
     GITHUB_CLIENT_ID: z.string().optional(),
     GITHUB_CLIENT_SECRET: z.string().optional(),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
   })
+  .superRefine((env, ctx) => {
+    if (Boolean(env.SMTP_USER) !== Boolean(env.SMTP_PASSWORD))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMTP_USER'],
+        message: 'SMTP_USER and SMTP_PASSWORD must be configured together',
+      });
+    if (env.NODE_ENV === 'production') {
+      for (const key of ['APP_URL', 'SMTP_HOST', 'MAIL_FROM'] as const)
+        if (!env[key])
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required in production`,
+          });
+      if (env.APP_URL && !env.APP_URL.startsWith('https://'))
+        ctx.addIssue({
+          code: 'custom',
+          path: ['APP_URL'],
+          message: 'APP_URL must use HTTPS in production',
+        });
+      if (env.SMTP_REQUIRE_TLS === false && !env.SMTP_SECURE)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['SMTP_REQUIRE_TLS'],
+          message: 'SMTP must use TLS in production',
+        });
+    }
+    if (
+      env.APP_URL &&
+      !['https:', 'http:'].includes(new URL(env.APP_URL).protocol)
+    )
+      ctx.addIssue({
+        code: 'custom',
+        path: ['APP_URL'],
+        message: 'APP_URL must use HTTP or HTTPS',
+      });
+  })
   .transform((env) => ({
     ...env,
+    APP_URL: env.APP_URL ?? 'http://localhost:8082',
+    SMTP_HOST: env.SMTP_HOST ?? 'localhost',
+    SMTP_PORT:
+      env.SMTP_PORT ??
+      (env.SMTP_SECURE ? 465 : env.NODE_ENV === 'production' ? 587 : 1025),
+    SMTP_REQUIRE_TLS: env.SMTP_REQUIRE_TLS ?? env.NODE_ENV === 'production',
+    MAIL_FROM: env.MAIL_FROM ?? 'hello@quilt.local',
     REDIS_URL:
       env.REDIS_URL && env.REDIS_URL.trim().length > 0
         ? env.REDIS_URL

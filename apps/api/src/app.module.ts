@@ -11,7 +11,6 @@ import { RedisModule } from './redis/redis.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', '../../.env'],
       validate: validateEnv,
     }),
     DatabaseModule,

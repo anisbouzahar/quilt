@@ -1,9 +1,21 @@
 import { z } from 'zod';
 
+export const PasswordSchema = z
+  .string()
+  .min(10, 'Password must be at least 10 characters')
+  .max(128, 'Password cannot exceed 128 characters')
+  .regex(/[a-z]/, 'Password must include at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must include at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must include at least one number')
+  .regex(
+    /[^A-Za-z0-9]/,
+    'Password must include at least one special character',
+  );
+
 export const SignUpWithEmailSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(100),
   email: z.email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: PasswordSchema,
 });
 export type SignUpWithEmailInput = z.infer<typeof SignUpWithEmailSchema>;
 

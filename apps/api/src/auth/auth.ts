@@ -1,9 +1,15 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { expo } from '@better-auth/expo';
+import { PasswordSchema } from '@quilt/contracts';
 import type { Database } from '@quilt/db';
 import { schema } from '@quilt/db';
 import { betterAuth } from 'better-auth';
 import { organization } from 'better-auth/plugins';
+import {
+  APIError,
+  createAuthMiddleware,
+  getSessionFromCtx,
+} from 'better-auth/api';
 import type { RedisService } from '../redis/redis.service';
 
 export interface AuthConfigOptions {
@@ -15,6 +21,11 @@ export interface AuthConfigOptions {
   googleClientId?: string;
   googleClientSecret?: string;
   redisService?: RedisService;
+  sendVerificationEmail: (input: {
+    email: string;
+    name: string;
+    token: string;
+  }) => Promise<void>;
 }
 
 export function createAuth(db: Database, options: AuthConfigOptions) {
@@ -73,6 +84,50 @@ export function createAuth(db: Database, options: AuthConfigOptions) {
     }),
     emailAndPassword: {
       enabled: true,
+      requireEmailVerification: true,
+      autoSignIn: false,
+      minPasswordLength: 10,
+      maxPasswordLength: 128,
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      sendOnSignIn: false,
+      autoSignInAfterVerification: false,
+      expiresIn: 60 * 60,
+      sendVerificationEmail: ({ user, token }) =>
+        options.sendVerificationEmail({
+          email: user.email,
+          name: user.name,
+          token,
+        }),
+    },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === '/sign-up/email') {
+          const body = ctx.body as { password?: unknown };
+          if (typeof body?.password === 'string') {
+            const result = PasswordSchema.safeParse(body.password);
+            if (!result.success) {
+              throw new APIError('BAD_REQUEST', {
+                code: 'INVALID_PASSWORD',
+                message:
+                  result.error.issues[0]?.message ??
+                  'Password does not meet complexity requirements.',
+              });
+            }
+          }
+        }
+        if (ctx.path.startsWith('/organization/')) {
+          const session = await getSessionFromCtx(ctx, {
+            disableCookieCache: true,
+          });
+          if (session && !session.user.emailVerified)
+            throw new APIError('FORBIDDEN', {
+              code: 'EMAIL_NOT_VERIFIED',
+              message: 'Confirm your email before accessing your household.',
+            });
+        }
+      }),
     },
     socialProviders:
       Object.keys(socialProviders).length > 0 ? socialProviders : undefined,
@@ -83,6 +138,10 @@ export function createAuth(db: Database, options: AuthConfigOptions) {
     rateLimit: {
       enabled: true,
       storage: secondaryStorage ? 'secondary-storage' : 'memory',
+      customRules: {
+        '/send-verification-email': { window: 60, max: 3 },
+        '/verify-email': { window: 60, max: 10 },
+      },
     },
     secondaryStorage,
     plugins: [organization(), expo()],

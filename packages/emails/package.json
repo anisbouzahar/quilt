@@ -1,0 +1,35 @@
+{
+  "name": "@quilt/emails",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "format": "prettier --ignore-path ../../.prettierignore --write .",
+    "format:check": "prettier --ignore-path ../../.prettierignore --check .",
+    "test": "pnpm build && node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "@quilt/ui": "workspace:*",
+    "react-email": "6.11.6",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@quilt/typescript-config": "workspace:*",
+    "@quilt/eslint-config": "workspace:*",
+    "@quilt/prettier-config": "workspace:*"
+  },
+  "prettier": "@quilt/prettier-config"
+}

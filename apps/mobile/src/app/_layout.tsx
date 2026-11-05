@@ -39,7 +39,8 @@ function RootNavigator() {
       </View>
     );
   }
-  const authenticated = Boolean(session) && status === 'ready';
+  const authenticated =
+    Boolean(session?.user.emailVerified) && status === 'ready';
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
@@ -55,6 +56,7 @@ function RootNavigator() {
         <Stack.Protected guard={authenticated}>
           <Stack.Screen name="home" />
         </Stack.Protected>
+        <Stack.Screen name="verify-email" />
       </Stack>
     </>
   );
