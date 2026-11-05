@@ -17,7 +17,7 @@
     "lint:fix": "eslint . --fix --max-warnings 0",
     "format": "prettier --ignore-path ../../.prettierignore --write .",
     "format:check": "prettier --ignore-path ../../.prettierignore --check .",
-    "test": "pnpm build && node --test tests/*.test.cjs"
+    "test": "vitest run"
   },
   "dependencies": {
     "@quilt/ui": "workspace:*",
@@ -29,7 +29,13 @@
     "@types/react": "catalog:",
     "@quilt/typescript-config": "workspace:*",
     "@quilt/eslint-config": "workspace:*",
-    "@quilt/prettier-config": "workspace:*"
+    "@quilt/prettier-config": "workspace:*",
+    "vitest": "catalog:",
+    "@types/node": "catalog:"
   },
-  "prettier": "@quilt/prettier-config"
+  "prettier": "@quilt/prettier-config",
+  "files": [
+    "dist",
+    "assets"
+  ]
 }

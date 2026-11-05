@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test tests/*.test.cjs",
+    "test": "vitest run",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
     "format": "prettier --ignore-path ../../.prettierignore --write .",
@@ -27,7 +27,8 @@
   "devDependencies": {
     "@quilt/eslint-config": "workspace:*",
     "@quilt/prettier-config": "workspace:*",
-    "@quilt/typescript-config": "workspace:*"
+    "@quilt/typescript-config": "workspace:*",
+    "vitest": "catalog:"
   },
   "prettier": "@quilt/prettier-config",
   "dependencies": {

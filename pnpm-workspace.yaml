@@ -13,6 +13,7 @@ catalog:
   tailwindcss: 4.3.4
   turbo: 2.11.10
   typescript: 6.0.3
+  vitest: 4.1.10
   zod: 4.6.7
 
 allowBuilds:
