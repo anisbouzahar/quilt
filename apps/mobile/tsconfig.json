@@ -1,0 +1,3 @@
+{
+  "extends": ["expo/tsconfig.base", "@quilt/typescript-config/base.json"]
+}
