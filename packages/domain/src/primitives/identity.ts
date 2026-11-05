@@ -58,4 +58,3 @@ export interface WorkspaceRecord<
   readonly id: EntityId<Kind>;
   readonly workspaceId: EntityId<'workspace'>;
 }
-

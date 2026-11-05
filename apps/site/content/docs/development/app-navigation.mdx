@@ -1,44 +1,30 @@
 ---
 title: App navigation
-description: Expo Router routes, floating navigation, menus, and drawers.
+description: Public introduction, authentication, and protected household setup.
 ---
 
-Expo Router owns the entry point (`expo-router/entry`) and discovers routes in
-`apps/mobile/src/app`. The root layout installs safe areas, appearance, and Tamagui once.
-The `(main)` group uses JavaScript tabs with a custom floating bar; it becomes a
-rail at 1024px. The bar follows the router's state and tab events. Mobile tab
-history and browser URLs/back are handled by Expo Router.
+Expo Router discovers routes in `apps/mobile/src/app`. The root layout installs
+safe areas, the Zustand-backed appearance provider, and Tamagui once. It restores
+the app session through the centralized client before selecting a route group.
 
-| URL              | Screen                                         |
-| ---------------- | ---------------------------------------------- |
-| `/`              | Household overview                             |
-| `/spending`      | Sample transactions and category filter        |
-| `/budgets`       | Sample monthly plans                           |
-| `/goals`         | Sample savings goal                            |
-| `/design-system` | Original interactive component gallery         |
-| `/settings`      | Session appearance preference and demo details |
+| URL        | Access     | Screen                                                     |
+| ---------- | ---------- | ---------------------------------------------------------- |
+| `/`        | Signed out | Short introduction with create-account and sign-in actions |
+| `/sign-up` | Signed out | Registration with local validation and live submission     |
+| `/sign-in` | Signed out | Email/password login                                       |
+| `/home`    | Signed in  | Real household list or initial household creation          |
 
-The last two pages are available through the navigation drawer. Unknown routes
-show a recovery link. `quilt://spending` is the equivalent native deep link;
-the `quilt` scheme requires a rebuilt development/production app, not Expo Go.
+Expo Router's `Stack.Protected` guards switch between `(auth)` and the protected `home` screen using
+the Zustand session. Signing out removes authenticated screens from the history.
+Unknown routes show a recovery link. The former sample overview, spending,
+budgets, goals, design-system gallery, and settings routes have been removed.
 
-`apps/mobile/src/components/app-shell.tsx` owns navigation and the expense preview drawer.
-`apps/mobile/src/screens` owns page content. New routes go in `apps/mobile/src/app`; add primary tabs to
-the destinations list in the shell. Keep routing and financial features out of
-`@quilt/ui`: it owns only the reusable `IconButton`, `ActionMenu`, and `Drawer`
-primitives. Menus use Tamagui Menu on desktop web and a modal drawer on smaller
-web/native screens. Drawers support Escape/outside dismissal on web, Android
-back, scrolling, and keyboard avoidance. They do not implement swipe gestures.
+The app no longer displays a navigation bar or drawers for unimplemented finance
+features. Shared navigation primitives remain available in `@quilt/ui` for use
+when real features need them.
 
-Appearance follows the device by default; overrides last for the app session.
-Financial figures and expense previews are demo-only and are not persisted.
-Connect authenticated NestJS endpoints before implementing saved records.
+See [authentication and app state](/docs/development/authentication-ui) for client
+configuration, state ownership, local setup, and security boundaries.
 
-`expo export` currently produces a single-page web app. Production hosting must
-serve `index.html` for application URLs such as `/spending` (while serving real
-asset files normally), so direct links and refreshes work. No deployment is
-configured by this change.
-
-Validation: `pnpm check`, `expo export --platform all`, and browser checks at
-390px and 1200px. Native exports validate bundles; simulator/device checks for
-safe areas, back, screen readers, and keyboards are still required.
+Web exports are single-page applications. Hosting must serve `index.html` for
+application paths while serving real assets normally. No deployment is configured.

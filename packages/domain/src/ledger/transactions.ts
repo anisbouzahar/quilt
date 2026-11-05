@@ -1,6 +1,10 @@
 import type { LocalDate } from '../primitives/calendar';
 import { localDate } from '../primitives/calendar';
-import type { EntityId, Timestamp, WorkspaceRecord } from '../primitives/identity';
+import type {
+  EntityId,
+  Timestamp,
+  WorkspaceRecord,
+} from '../primitives/identity';
 import type { ConversionQuote, Money } from '../primitives/money';
 import {
   addMoney,

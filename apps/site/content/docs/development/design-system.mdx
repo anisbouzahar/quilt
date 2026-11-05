@@ -49,7 +49,7 @@ classes such as `bg-surface`, `text-textMuted`, and `border-controlBorder` use t
 active theme, so a screen does not need two sets of color classes.
 
 `useQuiltTheme()` remains available for platform APIs and dynamic data styles.
-It returns `{ mode, colors }`. The gallery's theme selection is temporary.
+It returns `{ mode, colors }`. The app's appearance preference currently lasts for its session.
 
 | Foundation        | Value                                                                                                                   |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -120,9 +120,9 @@ pnpm check
 pnpm --filter @quilt/mobile exec expo export --platform all
 ```
 
-Root development commands build workspace packages first. The gallery exercises
-custom semantic tokens, responsive utility classes, both themes, buttons, and
-controlled form fields. It uses sample data only.
+The app's welcome and account screens use the shared controls and themes. The
+former in-app design-system gallery has been removed with the sample finance
+screens. Validate new controls at mobile and desktop widths and in both themes.
 
 References: [Tamagui installation](https://tamagui.dev/docs/intro/installation),
 [Tamagui Tailwind](https://tamagui.dev/tailwind/core/tailwind), and

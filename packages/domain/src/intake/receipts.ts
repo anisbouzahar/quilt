@@ -1,5 +1,9 @@
 import type { LocalDate } from '../primitives/calendar';
-import type { EntityId, Timestamp, WorkspaceRecord } from '../primitives/identity';
+import type {
+  EntityId,
+  Timestamp,
+  WorkspaceRecord,
+} from '../primitives/identity';
 import type { Money } from '../primitives/money';
 
 export interface ReceiptAttachment extends WorkspaceRecord<'receipt'> {
@@ -66,7 +70,9 @@ export interface ExpenseDraft extends WorkspaceRecord<'expense-draft'> {
 export type TransactionEvidence = WorkspaceRecord<'evidence-link'> & {
   readonly transactionId: EntityId<'transaction'>;
 } & (
-  | { readonly kind: 'receipt'; readonly receiptId: EntityId<'receipt'> }
-  | { readonly kind: 'import-row'; readonly importRowId: EntityId<'import-row'> }
-);
-
+    | { readonly kind: 'receipt'; readonly receiptId: EntityId<'receipt'> }
+    | {
+        readonly kind: 'import-row';
+        readonly importRowId: EntityId<'import-row'>;
+      }
+  );

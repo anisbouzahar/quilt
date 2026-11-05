@@ -1,26 +1,13 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  type PropsWithChildren,
-} from 'react';
-import { QuiltProvider, type ThemePreference } from '@quilt/ui';
-
-const AppearanceContext = createContext<{
-  preference: ThemePreference;
-  setPreference: (preference: ThemePreference) => void;
-} | null>(null);
+import type { PropsWithChildren } from 'react';
+import { QuiltProvider } from '@quilt/ui';
+import { useAppStore } from './app-store';
 
 export function AppearanceProvider({ children }: PropsWithChildren) {
-  const [preference, setPreference] = useState<ThemePreference>('system');
-  return (
-    <AppearanceContext.Provider value={{ preference, setPreference }}>
-      <QuiltProvider theme={preference}>{children}</QuiltProvider>
-    </AppearanceContext.Provider>
-  );
+  const preference = useAppStore((state) => state.appearance);
+  return <QuiltProvider theme={preference}>{children}</QuiltProvider>;
 }
 export function useAppearance() {
-  const context = useContext(AppearanceContext);
-  if (!context) throw new Error('AppearanceProvider is required.');
-  return context;
+  const preference = useAppStore((state) => state.appearance);
+  const setPreference = useAppStore((state) => state.setAppearance);
+  return { preference, setPreference };
 }

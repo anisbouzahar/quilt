@@ -1,13 +1,26 @@
+interface UnistNode {
+  type: string;
+  lang?: string;
+  value?: string;
+  meta?: string;
+  children?: UnistNode[];
+  [key: string]: unknown;
+}
+
 export function remarkMermaid() {
-  return (tree: any) => {
-    function walk(node: any, parent?: any, index?: number) {
+  return (tree: UnistNode) => {
+    function walk(node: UnistNode, parent?: UnistNode, index?: number) {
       if (
         node &&
         node.type === 'code' &&
         (node.lang === 'mermaid' || node.lang === 'pele')
       ) {
-        if (parent && typeof index === 'number') {
-          const attributes: any[] = [
+        if (parent && typeof index === 'number' && parent.children) {
+          const attributes: Array<{
+            type: string;
+            name: string;
+            value: unknown;
+          }> = [
             {
               type: 'mdxJsxAttribute',
               name: 'chart',
@@ -40,7 +53,10 @@ export function remarkMermaid() {
 
       if (node && Array.isArray(node.children)) {
         for (let i = 0; i < node.children.length; i++) {
-          walk(node.children[i], node, i);
+          const child = node.children[i];
+          if (child) {
+            walk(child, node, i);
+          }
         }
       }
     }
@@ -48,4 +64,3 @@ export function remarkMermaid() {
     walk(tree);
   };
 }
-

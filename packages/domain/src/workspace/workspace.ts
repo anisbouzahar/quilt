@@ -42,4 +42,3 @@ export function hasWorkspacePermission(
     return membership.role === 'owner' || membership.role === 'editor';
   return false;
 }
-

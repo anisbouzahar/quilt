@@ -51,12 +51,12 @@ Use `workspace:*` for internal dependencies. Keep `@quilt/db` out of client
 applications. Runtime libraries emit JavaScript and declarations into `dist`;
 configuration packages are consumed directly without a build step.
 
-The Expo app uses Expo Router with a floating mobile dock, a desktop rail,
-shared menus, and modal drawers. Overview, spending, budgets, and goals use
-sample data; the design-system gallery and settings are in the navigation
-menu. Run `pnpm dev:web` or `pnpm dev:mobile` to preview it. See
-[app navigation](/docs/development/app-navigation) for routes and deployment routing, and
-[shared controls](/docs/development/design-system) for visual guidelines.
+The Expo app opens with a short introduction, followed by live registration or
+sign-in. The authenticated home lists real households and supports household
+creation. Sample financial screens and demo navigation have been removed. See
+[app navigation](/docs/development/app-navigation),
+[authentication and state](/docs/development/authentication-ui), and
+[shared controls](/docs/development/design-system).
 
 The app icon source is `apps/mobile/assets/icon.svg`. Run
 `pnpm icons:generate` after changing it to regenerate the native icon, web
@@ -80,13 +80,12 @@ pnpm db:migrate   # Apply committed migrations to DATABASE_URL
 pnpm db:studio   # Inspect the configured development database
 ```
 
-The starter schema contains only a workspace table. The shared
-[domain models](/docs/domain-model) define financial concepts and pure
-rules separately; their persistence adapters and migrations are not implemented.
-No authentication, membership authorization, financial endpoints, or Supabase
-configuration is implemented yet. Do not expose the schema directly to clients until access
-policies are in place. The health endpoint reports process liveness, not
-database readiness, and works without PostgreSQL.
+The database schema includes Better Auth's user/session/account tables and
+household organizations, members, and invitations. Run the auth migration before
+using the connected app. The shared [domain models](/docs/domain-model) define
+financial concepts separately; financial persistence adapters and endpoints
+remain to be implemented. The health endpoint reports process liveness, not
+database readiness.
 
 ## Checks
 

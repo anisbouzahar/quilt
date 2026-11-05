@@ -34,4 +34,3 @@ export function validateAccount(account: FinancialAccount): void {
   }
   localDate(account.openingBalanceDate);
 }
-

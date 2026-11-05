@@ -43,7 +43,7 @@ function highlightMermaidLine(line: string): ReactNode {
   let keyIndex = 0;
 
   const tokenRegex =
-    /("(?:[^"\\]|\\.)*")|(\[[^\]]*\]|\([^\)]*\)|\{[^\}]*\})|(-->|-\.->|==>|-\.[^.]*\.->|---|-->|--\s*\|[^|]*\|\s*-->)|(\b(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|gantt|pie|gitGraph|mindmap|timeline|quadrantChart|sankey-beta|xychart-beta|LR|RL|TB|TD|BT|subgraph|end|classDef|class|style|click|note|over|participant|actor)\b)/g;
+    /("(?:[^"\\]|\\.)*")|(\[[^\]]*\]|\([^)]*\)|\{[^}]*\})|(-->|-\.->|==>|-\.[^.]*\.->|---|-->|--\s*\|[^|]*\|\s*-->)|(\b(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|gantt|pie|gitGraph|mindmap|timeline|quadrantChart|sankey-beta|xychart-beta|LR|RL|TB|TD|BT|subgraph|end|classDef|class|style|click|note|over|participant|actor)\b)/g;
 
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -151,7 +151,9 @@ export function Mermaid({
         mounted.destroy();
       };
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      queueMicrotask(() => {
+        setError(err instanceof Error ? err.message : String(err));
+      });
     }
   }, [rawChart, showCode, id]);
 
@@ -212,7 +214,9 @@ export function Mermaid({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleCopy}
+            onClick={() => {
+              void handleCopy();
+            }}
             className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-accent/70 transition-colors"
             title="Copy Mermaid code"
             aria-label="Copy Mermaid code"

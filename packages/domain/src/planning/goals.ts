@@ -2,7 +2,11 @@ import type { LocalDate } from '../primitives/calendar';
 import { localDate } from '../primitives/calendar';
 import type { Money } from '../primitives/money';
 import { isPositiveMoney } from '../primitives/money';
-import type { EntityId, Timestamp, WorkspaceRecord } from '../primitives/identity';
+import type {
+  EntityId,
+  Timestamp,
+  WorkspaceRecord,
+} from '../primitives/identity';
 
 export interface Goal extends WorkspaceRecord<'goal'> {
   readonly name: string;
@@ -39,7 +43,10 @@ export function validateGoal(goal: Goal): void {
       localDate(goal.targetOn);
       requireRule(goal.targetOn >= goal.startsOn, 'Invalid deadline.');
     }
-    requireRule(goal.progressMode === 'tracked', 'Only tracked goals supported.');
+    requireRule(
+      goal.progressMode === 'tracked',
+      'Only tracked goals supported.',
+    );
   }
   requireRule(isPositiveMoney(goal.target), 'Positive target required.');
 }

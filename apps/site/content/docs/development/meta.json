@@ -6,6 +6,7 @@
     "domain-package",
     "design-system",
     "app-navigation",
+    "authentication-ui",
     "site"
   ]
 }

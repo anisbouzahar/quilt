@@ -1,12 +1,25 @@
 import type { LocalDate, YearMonth } from '../primitives/calendar';
 import { localDate, yearMonth } from '../primitives/calendar';
 import type { CurrencyCode, Money } from '../primitives/money';
-import { addMoney, compareMoney, isPositiveMoney, money } from '../primitives/money';
-import type { EntityId, WorkspaceRecord, Timestamp } from '../primitives/identity';
+import {
+  addMoney,
+  compareMoney,
+  isPositiveMoney,
+  money,
+} from '../primitives/money';
+import type {
+  EntityId,
+  WorkspaceRecord,
+  Timestamp,
+} from '../primitives/identity';
 import type { Transaction } from '../ledger/transactions';
 
 export type RecurrenceRule =
-  | { readonly kind: 'weekly'; readonly everyWeeks: number; readonly anchorOn: LocalDate }
+  | {
+      readonly kind: 'weekly';
+      readonly everyWeeks: number;
+      readonly anchorOn: LocalDate;
+    }
   | {
       readonly kind: 'monthly';
       readonly everyMonths: number;
@@ -86,7 +99,10 @@ export function validateCashFlowRevision(r: CashFlowRevision): void {
     check(r.endsOn >= r.effectiveFrom, 'Invalid end date.');
   }
   if (r.expectation.kind !== 'unknown') {
-    check(isPositiveMoney(r.expectation.amount), 'Positive expectation required.');
+    check(
+      isPositiveMoney(r.expectation.amount),
+      'Positive expectation required.',
+    );
   }
   const d = (n: number) =>
     check(Number.isInteger(n) && n >= 1 && n <= 31, 'Invalid day.');
@@ -94,12 +110,18 @@ export function validateCashFlowRevision(r: CashFlowRevision): void {
   switch (q.kind) {
     case 'weekly':
       localDate(q.anchorOn);
-      check(Number.isInteger(q.everyWeeks) && q.everyWeeks > 0, 'Invalid interval.');
+      check(
+        Number.isInteger(q.everyWeeks) && q.everyWeeks > 0,
+        'Invalid interval.',
+      );
       break;
     case 'monthly':
       yearMonth(q.anchorMonth);
       d(q.day);
-      check(Number.isInteger(q.everyMonths) && q.everyMonths > 0, 'Invalid interval.');
+      check(
+        Number.isInteger(q.everyMonths) && q.everyMonths > 0,
+        'Invalid interval.',
+      );
       break;
     case 'twice-monthly':
       d(q.days[0]);
@@ -107,7 +129,9 @@ export function validateCashFlowRevision(r: CashFlowRevision): void {
       check(q.days[0] < q.days[1], 'Days must be distinct and ordered.');
       break;
     case 'yearly':
-      localDate(`2000-${String(q.month).padStart(2, '0')}-${String(q.day).padStart(2, '0')}`);
+      localDate(
+        `2000-${String(q.month).padStart(2, '0')}-${String(q.day).padStart(2, '0')}`,
+      );
       break;
   }
 }
@@ -124,7 +148,10 @@ export function validateSettlement(
     a.workspaceId === o.workspaceId && a.workspaceId === t.workspaceId,
     'Workspace mismatch.',
   );
-  check(a.occurrenceId === o.id && a.transactionId === t.id, 'Reference mismatch.');
+  check(
+    a.occurrenceId === o.id && a.transactionId === t.id,
+    'Reference mismatch.',
+  );
   check(o.disposition.kind === 'active', 'Occurrence not active.');
   check(t.kind === 'income' || t.kind === 'expense', 'Invalid payment type.');
   check(
@@ -143,7 +170,8 @@ export function validateSettlement(
       e.workspaceId === a.workspaceId && e.transactionId === a.transactionId,
       'Allocation scope mismatch.',
     );
-    if (e.id !== a.id && e.reversedAt === null) total = addMoney(total, e.amount);
+    if (e.id !== a.id && e.reversedAt === null)
+      total = addMoney(total, e.amount);
   }
   check(compareMoney(total, t.amount) <= 0, 'Payment overallocated.');
 }
@@ -174,4 +202,3 @@ export function occurrenceProgress(
           : 'open';
   return { settled, status };
 }
-

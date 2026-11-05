@@ -1,0 +1,80 @@
+---
+title: Authentication and app state
+description: Welcome, live email authentication, the centralized client, and the Zustand store.
+---
+
+Quilt starts at `/` with a short presentation of shared spending, budgets, and
+savings goals. `/sign-up` creates an account and `/sign-in` opens an existing
+account through Better Auth. `/home` is protected and shows real households or a
+household-creation form. The former sample finance screens, floating demo
+navigation, gallery route, and expense preview have been removed.
+
+## State and client boundaries
+
+`apps/mobile/src/lib/client.ts` is the only backend client. It configures the
+API URL, Better Auth transport, Expo secure cookie storage, and typed auth and
+household operations. Response schemas from `@quilt/contracts` validate session
+and household data at that boundary. Web uses browser cookies; native uses the
+Better Auth Expo plugin and SecureStore. No session tokens enter Zustand or
+localStorage.
+
+`apps/mobile/src/state/app-store.ts` exports the Zustand store and selector hook.
+Its factory, `create-app-store.ts`, accepts a client for isolated tests. The store
+owns the app's session, session status, households, request status, and appearance
+preference. Screens invoke store actions and select state; they do not import the
+Better Auth SDK or maintain separate session copies. Credentials and field
+validation stay inside the form and are never persisted.
+
+The store restores the session on startup, refreshes on app foreground/browser
+focus and auth signals, and clears household state when the account changes or
+sign-out succeeds. Request generations prevent old responses from restoring
+signed-out sessions or another user's households. Appearance currently lasts
+for the app session and defaults to the device theme.
+
+## Local setup
+
+Configure the NestJS API using the root `.env.example`, including the database,
+Redis, a generated `BETTER_AUTH_SECRET`, and exact `CORS_ORIGINS`. Both
+`http://localhost:8081` and `http://localhost:8082` are included in the development
+default. Better Auth trusts those same configured origins and `quilt://`.
+
+```sh
+pnpm install
+pnpm db:migrate
+pnpm dev:api
+pnpm dev:web
+```
+
+Migration `0001_auth_households.sql` adds the auth and organization tables while
+preserving the existing workspace table. Apply it to your configured development
+database before creating accounts.
+
+Set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` when needed; see
+`apps/mobile/.env.example`. Use localhost for web/iOS simulator, the host's LAN
+address for physical devices, and an accessible host address for Android.
+Development otherwise derives the native host from Expo, falling back to the
+Android emulator host or localhost. Production requires an explicit HTTPS API
+URL. Cross-site web deployments need a deliberate cookie/domain configuration;
+local development assumes the web app and API share the same hostname.
+
+The app uses Expo SecureStore's config plugin. Rebuild native development clients
+after installing these modules. No credentials are included in the public API URL.
+
+## Scope and verification
+
+Account creation, sign-in, session restore, sign-out, household listing, and
+household creation use the backend. Request errors stay visible, repeat presses
+are blocked, and invalid forms focus the first invalid field. Expo Router guards
+protect `/home`; server-side authorization remains the responsibility of the API.
+
+Social sign-in and password reset are not offered yet. Reset-email delivery is
+not configured in the backend, so the previous nonfunctional reset screen was
+removed. Household financial features will be built on actual records rather
+than sample balances.
+
+The mobile test suite covers session/cache cleanup, rejected credentials,
+failed sign-out, and stale responses after sign-out. Native device QA is still
+needed for secure storage, keyboard behavior, and deep links.
+
+References: [Better Auth Expo integration](https://better-auth.com/docs/integrations/expo)
+and [Expo protected routes](https://docs.expo.dev/router/advanced/protected/).

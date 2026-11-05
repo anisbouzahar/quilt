@@ -7,4 +7,3 @@ export const workspaces = pgTable('workspaces', {
     .defaultNow()
     .notNull(),
 });
-

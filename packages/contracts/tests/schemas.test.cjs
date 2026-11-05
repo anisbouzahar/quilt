@@ -80,3 +80,36 @@ test('PaginationQuerySchema coerces strings and provides defaults', () => {
   assert.equal(parsedCoerced.page, 3);
   assert.equal(parsedCoerced.limit, 50);
 });
+
+test('auth session responses validate identity and strip transport tokens', () => {
+  const { AuthSessionSchema } = require('../dist');
+  const timestamp = '2026-11-05T12:00:00.000Z';
+  const response = {
+    session: {
+      id: 's1',
+      userId: 'u1',
+      token: 'transport-only-token',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      expiresAt: timestamp,
+    },
+    user: {
+      id: 'u1',
+      name: 'Alex',
+      email: 'alex@example.com',
+      emailVerified: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    },
+  };
+  const parsed = AuthSessionSchema.parse(response);
+  assert.equal('token' in parsed.session, false);
+  assert.ok(parsed.session.expiresAt instanceof Date);
+  assert.equal(
+    AuthSessionSchema.safeParse({
+      ...response,
+      user: { ...response.user, email: 'invalid' },
+    }).success,
+    false,
+  );
+});

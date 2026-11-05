@@ -2,6 +2,7 @@ node_modules
 dist
 coverage
 .expo
+.turbo
 .pnpm-store
 .pnpm-cache
 *.tsbuildinfo

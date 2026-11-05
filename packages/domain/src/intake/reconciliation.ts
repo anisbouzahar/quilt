@@ -1,5 +1,9 @@
 import type { LocalDate } from '../primitives/calendar';
-import type { EntityId, WorkspaceRecord, Timestamp } from '../primitives/identity';
+import type {
+  EntityId,
+  WorkspaceRecord,
+  Timestamp,
+} from '../primitives/identity';
 import type { Money } from '../primitives/money';
 
 export interface Reconciliation extends WorkspaceRecord<'reconciliation'> {
@@ -16,10 +20,8 @@ export interface Reconciliation extends WorkspaceRecord<'reconciliation'> {
       };
 }
 
-export interface ReconciliationItem
-  extends WorkspaceRecord<'reconciliation-item'> {
+export interface ReconciliationItem extends WorkspaceRecord<'reconciliation-item'> {
   readonly reconciliationId: EntityId<'reconciliation'>;
   readonly transactionId: EntityId<'transaction'>;
   readonly transactionVersion: number;
 }
-

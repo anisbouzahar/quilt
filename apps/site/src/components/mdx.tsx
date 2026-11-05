@@ -1,6 +1,6 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { Mermaid, Pele } from './mermaid';
 
 function getRawText(node: ReactNode): string {
@@ -9,32 +9,43 @@ function getRawText(node: ReactNode): string {
   if (!node) return '';
   if (Array.isArray(node)) return node.map(getRawText).join('');
   if (typeof node === 'object' && 'props' in node) {
-    return getRawText((node as any).props?.children);
+    const props = (node as { props?: { children?: ReactNode } }).props;
+    return getRawText(props?.children);
   }
   return '';
 }
 
-function CustomPre(props: any) {
-  const child = props?.children;
-  const childProps = child && typeof child === 'object' && 'props' in child ? child.props : null;
+interface CustomPreProps extends ComponentPropsWithoutRef<'pre'> {
+  'data-language'?: string;
+  title?: string;
+}
+
+function CustomPre(props: CustomPreProps) {
+  const child = props.children;
+  const childProps =
+    child && typeof child === 'object' && 'props' in child
+      ? ((child as { props?: CustomPreProps }).props ?? null)
+      : null;
 
   const isMermaid =
-    props?.['data-language'] === 'mermaid' ||
-    props?.['data-language'] === 'pele' ||
-    (typeof props?.className === 'string' && props.className.includes('language-mermaid')) ||
+    props['data-language'] === 'mermaid' ||
+    props['data-language'] === 'pele' ||
+    (typeof props.className === 'string' &&
+      props.className.includes('language-mermaid')) ||
     childProps?.['data-language'] === 'mermaid' ||
     childProps?.['data-language'] === 'pele' ||
-    (typeof childProps?.className === 'string' && childProps.className.includes('language-mermaid'));
+    (typeof childProps?.className === 'string' &&
+      childProps.className.includes('language-mermaid'));
 
   if (isMermaid) {
-    const rawChart = getRawText(child ?? props);
+    const rawChart = getRawText(child ?? props.children);
     return (
       <Mermaid
         chart={rawChart}
         codeBlock={child}
-        figureStyle={props?.style}
-        figureClassName={props?.className}
-        title={props?.title}
+        figureStyle={props.style}
+        figureClassName={props.className}
+        title={props.title}
       />
     );
   }

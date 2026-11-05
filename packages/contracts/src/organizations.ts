@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+export const HouseholdSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  logo: z.string().nullish(),
+  createdAt: z.coerce.date(),
+});
+export type Household = z.infer<typeof HouseholdSchema>;
+
 export const CreateOrganizationSchema = z.object({
   name: z
     .string()

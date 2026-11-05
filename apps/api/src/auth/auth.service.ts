@@ -18,6 +18,8 @@ export class AuthService {
     this._auth ??= createAuth(this.databaseService.db, {
       baseURL: this.configService.get<string>('BETTER_AUTH_URL'),
       secret: this.configService.getOrThrow<string>('BETTER_AUTH_SECRET'),
+      trustedOrigins:
+        this.configService.getOrThrow<string[]>('CORS_ORIGIN_LIST'),
       githubClientId: this.configService.get<string>('GITHUB_CLIENT_ID'),
       githubClientSecret: this.configService.get<string>(
         'GITHUB_CLIENT_SECRET',

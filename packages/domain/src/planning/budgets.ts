@@ -1,8 +1,17 @@
 import type { YearMonth } from '../primitives/calendar';
 import { yearMonth } from '../primitives/calendar';
 import type { Money } from '../primitives/money';
-import { addMoney, compareMoney, isNegativeMoney, money } from '../primitives/money';
-import type { EntityId, Timestamp, WorkspaceRecord } from '../primitives/identity';
+import {
+  addMoney,
+  compareMoney,
+  isNegativeMoney,
+  money,
+} from '../primitives/money';
+import type {
+  EntityId,
+  Timestamp,
+  WorkspaceRecord,
+} from '../primitives/identity';
 import type { Category } from '../ledger/catalog';
 
 export interface BudgetLine {
@@ -76,4 +85,3 @@ export function validateBudget(
     'Category limits cannot exceed the overall budget.',
   );
 }
-

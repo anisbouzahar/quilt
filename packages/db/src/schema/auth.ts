@@ -70,4 +70,3 @@ export const verification = pgTable('verification', {
     .notNull()
     .defaultNow(),
 });
-

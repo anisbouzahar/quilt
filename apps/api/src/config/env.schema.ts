@@ -6,7 +6,9 @@ export const EnvSchema = z
       .enum(['development', 'test', 'production'])
       .default('development'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
-    CORS_ORIGINS: z.string().default('http://localhost:8081'),
+    CORS_ORIGINS: z
+      .string()
+      .default('http://localhost:8081,http://localhost:8082'),
     DATABASE_URL: z.string({
       error: 'DATABASE_URL is required',
     }),

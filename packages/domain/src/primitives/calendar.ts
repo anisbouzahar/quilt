@@ -42,4 +42,3 @@ export function monthlyBillDate(
   }
   throw new Error('Invalid bill month.');
 }
-

@@ -9,7 +9,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @All('*')
+  @All('{*path}')
   async handleAuth(@Req() req: Request, @Res() res: Response) {
     return toNodeHandler(this.authService.auth)(req, res);
   }

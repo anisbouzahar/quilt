@@ -29,4 +29,3 @@ export interface ImportRow extends WorkspaceRecord<'import-row'> {
   readonly sourceObjectKey: string;
   readonly decision: ImportDecision;
 }
-

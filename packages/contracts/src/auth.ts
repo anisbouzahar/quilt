@@ -12,3 +12,24 @@ export const SignInWithEmailSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 export type SignInWithEmailInput = z.infer<typeof SignInWithEmailSchema>;
+
+export const AuthSessionSchema = z.object({
+  session: z.object({
+    id: z.string(),
+    userId: z.string(),
+    expiresAt: z.coerce.date(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
+    activeOrganizationId: z.string().nullish(),
+  }),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.email(),
+    emailVerified: z.boolean(),
+    image: z.string().nullish(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
+  }),
+});
+export type AuthSession = z.infer<typeof AuthSessionSchema>;

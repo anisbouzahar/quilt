@@ -1,4 +1,5 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
+import { expo } from '@better-auth/expo';
 import type { Database } from '@quilt/db';
 import { schema } from '@quilt/db';
 import { betterAuth } from 'better-auth';
@@ -8,6 +9,7 @@ import type { RedisService } from '../redis/redis.service';
 export interface AuthConfigOptions {
   baseURL?: string;
   secret: string;
+  trustedOrigins?: string[];
   githubClientId?: string;
   githubClientSecret?: string;
   googleClientId?: string;
@@ -64,6 +66,7 @@ export function createAuth(db: Database, options: AuthConfigOptions) {
     baseURL,
     basePath: '/api/auth',
     secret,
+    trustedOrigins: [...(options.trustedOrigins ?? []), 'quilt://'],
     database: drizzleAdapter(db, {
       provider: 'pg',
       schema,
@@ -82,7 +85,7 @@ export function createAuth(db: Database, options: AuthConfigOptions) {
       storage: secondaryStorage ? 'secondary-storage' : 'memory',
     },
     secondaryStorage,
-    plugins: [organization()],
+    plugins: [organization(), expo()],
   });
 }
 
