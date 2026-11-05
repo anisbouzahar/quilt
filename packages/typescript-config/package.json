@@ -1,0 +1,16 @@
+{
+  "name": "@quilt/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./node.json": "./node.json",
+    "./library.json": "./library.json",
+    "./react-library.json": "./react-library.json",
+    "./nextjs.json": "./nextjs.json"
+  },
+  "peerDependencies": {
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "quilt",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "build:site": "turbo run build --filter=@quilt/site",
+    "dev": "turbo run dev",
+    "dev:site": "turbo run dev --filter=@quilt/site",
+    "dev:api": "turbo run dev --filter=@quilt/api",
+    "dev:mobile": "turbo run dev --filter=@quilt/mobile",
+    "dev:web": "turbo run dev --filter=@quilt/mobile -- web",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "test": "turbo run test",
+    "check": "turbo run lint typecheck test && pnpm format:check",
+    "format": "prettier --ignore-path .prettierignore --write .",
+    "format:check": "prettier --ignore-path .prettierignore --check .",
+    "db:generate": "pnpm --filter @quilt/db db:generate",
+    "db:migrate": "pnpm --filter @quilt/db db:migrate",
+    "db:studio": "pnpm --filter @quilt/db db:studio",
+    "icons:generate": "node scripts/generate-app-icons.mjs",
+    "icons:check": "node scripts/check-app-icon.mjs"
+  },
+  "devDependencies": {
+    "@quilt/eslint-config": "workspace:*",
+    "@quilt/prettier-config": "workspace:*",
+    "@quilt/typescript-config": "workspace:*",
+    "@resvg/resvg-js": "2.6.2",
+    "@types/node": "^24.10.0",
+    "eslint": "^10.14.0",
+    "pngjs": "7.0.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.11.10",
+    "typescript": "~6.0.3"
+  }
+}

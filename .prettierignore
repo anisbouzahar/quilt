@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.expo
+.pnpm-store
+.pnpm-cache
+*.tsbuildinfo
+pnpm-lock.yaml
+packages/db/drizzle
+
+.next
+.source
+out
+apps/site/next-env.d.ts
+apps/mobile/expo-env.d.ts
