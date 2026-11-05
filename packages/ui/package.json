@@ -1,0 +1,48 @@
+{
+  "name": "@quilt/ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "format": "prettier --ignore-path ../../.prettierignore --write .",
+    "format:check": "prettier --ignore-path ../../.prettierignore --check ."
+  },
+  "peerDependencies": {
+    "react": "19.3.0",
+    "react-native": "0.88.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "@quilt/typescript-config": "workspace:*",
+    "@quilt/eslint-config": "workspace:*",
+    "@quilt/prettier-config": "workspace:*"
+  },
+  "dependencies": {
+    "tamagui": "3.2.2",
+    "@tamagui/config": "3.2.2",
+    "@tamagui/tailwind": "3.2.2",
+    "tailwindcss": "4.3.0"
+  },
+  "type": "module",
+  "prettier": "@quilt/prettier-config"
+}
