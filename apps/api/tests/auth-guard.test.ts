@@ -7,7 +7,9 @@ import type { AuthService } from '../src/auth/auth.service';
 function fixture(session: unknown) {
   const request: Record<string, unknown> = { headers: {} };
   const guard = new AuthGuard(
-    { auth: { api: { getSession: async () => session } } } as unknown as AuthService,
+    {
+      auth: { api: { getSession: async () => session } },
+    } as unknown as AuthService,
     { getAllAndOverride: () => false } as unknown as Reflector,
   );
   const context = {
@@ -38,4 +40,3 @@ describe('AuthGuard', () => {
     expect(request.session).toBe(session.session);
   });
 });
-

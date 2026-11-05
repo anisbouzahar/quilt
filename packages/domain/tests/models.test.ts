@@ -169,10 +169,7 @@ describe('Domain Models', () => {
         'manage-members',
       ] as const) {
         expect(
-          hasWorkspacePermission(
-            { ...member, status: 'revoked' },
-            permission,
-          ),
+          hasWorkspacePermission({ ...member, status: 'revoked' }, permission),
         ).toBe(false);
       }
     }
@@ -252,10 +249,7 @@ describe('Domain Models', () => {
       }),
     ).toThrow();
     expect(() =>
-      validateTransaction(
-        { ...expense, tagIds: [tag.id, tag.id] },
-        references,
-      ),
+      validateTransaction({ ...expense, tagIds: [tag.id, tag.id] }, references),
     ).toThrow();
     expect(() =>
       validateTransaction(expense, { ...references, merchants: [] }),
@@ -265,10 +259,7 @@ describe('Domain Models', () => {
   it('transfers preserve two currencies and enforce atomic same-currency balance', () => {
     expect(() => validateTransaction(transfer, references)).not.toThrow();
     expect(() =>
-      validateTransaction(
-        { ...transfer, credit: transfer.debit },
-        references,
-      ),
+      validateTransaction({ ...transfer, credit: transfer.debit }, references),
     ).toThrow(/distinct accounts/);
     const second = { ...eur, id: entityId('second-eur') };
     const sameCurrency = {
@@ -276,7 +267,10 @@ describe('Domain Models', () => {
       credit: { accountId: second.id, amount: money('10', 'EUR') },
     };
     expect(() =>
-      validateTransaction(sameCurrency, { ...references, accounts: [eur, second] }),
+      validateTransaction(sameCurrency, {
+        ...references,
+        accounts: [eur, second],
+      }),
     ).not.toThrow();
     expect(() =>
       validateTransaction(
@@ -366,7 +360,9 @@ describe('Domain Models', () => {
     };
     expect(() => validateGoal(goal)).not.toThrow();
     expect(() => validateGoal({ ...goal, year: 2026.5 })).toThrow();
-    expect(() => validateGoal({ ...goal, target: money('0', 'EUR') })).toThrow();
+    expect(() =>
+      validateGoal({ ...goal, target: money('0', 'EUR') }),
+    ).toThrow();
   });
 
   it('spending excludes transfers, income, pending and voided entries; refunds reduce it', () => {
@@ -429,4 +425,3 @@ describe('Domain Models', () => {
     ).toBe(false);
   });
 });
-

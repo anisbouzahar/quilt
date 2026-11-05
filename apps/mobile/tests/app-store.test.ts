@@ -222,4 +222,3 @@ describe('AppStore', () => {
     expect(store.getState().session).toBeNull();
   });
 });
-

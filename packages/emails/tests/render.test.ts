@@ -4,7 +4,8 @@ import { themes } from '@quilt/ui/tokens';
 
 describe('Verification Email Rendering', () => {
   it('verification mail renders Quilt branding, escapes names, and includes a text alternative', async () => {
-    const url = 'https://app.example.com/verify-email?token=fixture&other=value';
+    const url =
+      'https://app.example.com/verify-email?token=fixture&other=value';
     const mail = await renderVerificationEmail({
       name: '<script>alert(1)</script>',
       verificationURL: url,
@@ -28,4 +29,3 @@ describe('Verification Email Rendering', () => {
     ).rejects.toThrow();
   });
 });
-

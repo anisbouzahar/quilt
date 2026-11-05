@@ -54,7 +54,9 @@ describe('Domain Money', () => {
     const eur = money('1', 'EUR');
     const usd = money('1', 'USD');
     for (const operation of [addMoney, subtractMoney, compareMoney]) {
-      expect(() => operation(eur, usd)).toThrow(/Convert currencies explicitly/);
+      expect(() => operation(eur, usd)).toThrow(
+        /Convert currencies explicitly/,
+      );
     }
   });
 
@@ -76,7 +78,9 @@ describe('Domain Money', () => {
       );
     }
     for (const digits of [-1, 1.5, 19]) {
-      expect(() => roundMoney(money('1', 'EUR'), digits, 'half-even')).toThrow();
+      expect(() =>
+        roundMoney(money('1', 'EUR'), digits, 'half-even'),
+      ).toThrow();
     }
     expect(() =>
       roundMoney(money('1', 'EUR'), 2, 'guess' as unknown as RoundingMode),
@@ -106,12 +110,17 @@ describe('Domain Money', () => {
   });
 
   it('conversion rejects a reversed, nonpositive, or unattributed quote', () => {
-    expect(() => convertMoney(money('10', 'EUR'), quote, 2, 'half-even')).toThrow();
+    expect(() =>
+      convertMoney(money('10', 'EUR'), quote, 2, 'half-even'),
+    ).toThrow();
     for (const rate of ['0', '-1']) {
       expect(() =>
         convertMoney(
           money('10', 'USD'),
-          { ...quote, rate: rate as unknown as ReturnType<typeof decimalAmount> },
+          {
+            ...quote,
+            rate: rate as unknown as ReturnType<typeof decimalAmount>,
+          },
           2,
           'half-even',
         ),
@@ -129,4 +138,3 @@ describe('Domain Money', () => {
     }
   });
 });
-

@@ -32,4 +32,3 @@ describe('validateEnv mail configuration', () => {
     expect(prod.SMTP_PORT).toBe(587);
   });
 });
-

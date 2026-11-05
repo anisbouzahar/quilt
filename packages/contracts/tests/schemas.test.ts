@@ -136,4 +136,3 @@ describe('Contracts Schemas', () => {
     expect(parsed.user.email).toBe('alex@example.com');
   });
 });
-
