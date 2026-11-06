@@ -35,21 +35,23 @@ describe('AppStore', () => {
 
     return {
       auth: {
-        getSession: async () => session,
-        signIn: async () => ({ status: 'authenticated', session }),
-        register: async (input: { email: string }) => ({
-          status: 'verification-required',
-          email: input.email,
-        }),
-        resendVerification: async () => {},
-        verifyEmail: async () => {},
-        signOut: async () => {},
+        getSession: () => Promise.resolve(session),
+        requireSession: () => Promise.resolve(session),
+        signIn: () => Promise.resolve({ status: 'authenticated', session }),
+        register: (input: { email: string }) =>
+          Promise.resolve({
+            status: 'verification-required',
+            email: input.email,
+          }),
+        resendVerification: () => Promise.resolve(),
+        verifyEmail: () => Promise.resolve(),
+        signOut: () => Promise.resolve(),
         subscribe: () => () => {},
         ...authOverrides,
       },
       households: {
-        list: async () => [household],
-        create: async (name: string) => ({ ...household, name }),
+        list: () => Promise.resolve([household]),
+        create: (name: string) => Promise.resolve({ ...household, name }),
         ...householdOverrides,
       },
     } as Parameters<typeof createAppStore>[0];
@@ -93,9 +95,7 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         auth: {
-          signIn: async () => {
-            throw new Error('Invalid credentials');
-          },
+          signIn: () => Promise.reject(new Error('Invalid credentials')),
         },
       }),
     );
@@ -132,9 +132,7 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         auth: {
-          signOut: async () => {
-            throw new Error('Offline');
-          },
+          signOut: () => Promise.reject(new Error('Offline')),
         },
       }),
     );
@@ -151,9 +149,9 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         households: {
-          list: async () => {
+          list: () => {
             lists++;
-            return [];
+            return Promise.resolve([]);
           },
         },
       }),
@@ -173,10 +171,11 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         auth: {
-          getSession: async () => ({
-            ...session,
-            user: { ...session.user, emailVerified: false },
-          }),
+          getSession: () =>
+            Promise.resolve({
+              ...session,
+              user: { ...session.user, emailVerified: false },
+            }),
         },
       }),
     );
@@ -191,8 +190,9 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         auth: {
-          resendVerification: async () => {
+          resendVerification: () => {
             sends++;
+            return Promise.resolve();
           },
         },
       }),
@@ -210,9 +210,7 @@ describe('AppStore', () => {
     const store = createAppStore(
       fakeClient({
         auth: {
-          verifyEmail: async () => {
-            throw new Error('expired');
-          },
+          verifyEmail: () => Promise.reject(new Error('expired')),
         },
       }),
     );
